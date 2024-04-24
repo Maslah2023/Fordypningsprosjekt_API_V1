@@ -1,6 +1,8 @@
 ﻿using FastFoodHouse_API.Data;
 using FastFoodHouse_API.Models;
 using FastFoodHouse_API.Models.Dtos;
+using FastFoodHouse_API.Service;
+using FastFoodHouse_API.Service.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,13 +16,16 @@ namespace FastFoodHouse_API.Controller
     public class ShoppingCartController : ControllerBase
     {
 
-        private readonly ApplicationDbContext _db;
+        private readonly IShoppingCartService _shoppingCartService;
         private readonly ApiResponse _response;
-        public ShoppingCartController(ApplicationDbContext db)
+        private readonly IMenuService _menuService;
+        private readonly ICartItemService _cartItemService;
+        public ShoppingCartController(IShoppingCartService shoppingCartService, IMenuService menuService, ICartItemService cartItemService)
         {
-            _db = db;
+            _shoppingCartService = shoppingCartService;
+            _menuService = menuService;
             _response = new ApiResponse();
-
+            _cartItemService = cartItemService;
         }
         //[HttpGet("{id}")]
         //public async Task<ActionResult<ApiResponse>> GetShoppingCarts(string id)
@@ -83,27 +88,25 @@ namespace FastFoodHouse_API.Controller
         [HttpGet]
         public async Task<IActionResult> GetShoppingCart(string userId)
         {
-            ShoppingCart? shoppingCart;
+        
 
             try
             {
-                shoppingCart =
-                await _db.ShoppingCarts
-               .Include(u => u.CartItems)
-               .FirstOrDefaultAsync(u => u.UserId == userId);
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    shoppingCart = new ShoppingCart();
-                }
 
 
-                if (shoppingCart == null)
+                ShoppingCartDTO shoppingCarts = await
+                _shoppingCartService.GetShoppingById(userId);
+
+                if (shoppingCarts == null)
                 {
                     _response.IsSuccess = false;
                     _response.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
+
+                _response.Result = shoppingCarts;
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
 
             }
             catch (Exception ex)
@@ -114,9 +117,7 @@ namespace FastFoodHouse_API.Controller
                 return BadRequest(_response);
             }
 
-            _response.Result = shoppingCart;
-            _response.StatusCode = HttpStatusCode.OK;
-            return Ok(_response);
+           
 
 
 
@@ -128,13 +129,15 @@ namespace FastFoodHouse_API.Controller
         {
             try
             {
-                ShoppingCart? shoppingCart = await
-                _db.ShoppingCarts
-                .Include(u => u.CartItems)
-                .FirstOrDefaultAsync(u => u.UserId == userId);
+                //ShoppingCart? shoppingCart = await
+                //_db.ShoppingCarts
+                //.Include(u => u.CartItems)
+                //.FirstOrDefaultAsync(u => u.UserId == userId);
+               ShoppingCartDTO shoppingCartDTO = await _shoppingCartService.GetShoppingCart(userId);
+          
 
-                MenuItem? menuItem = await
-               _db.Menu.FirstOrDefaultAsync(u => u.Id == menuItemId);
+                MenuDTO? menuItem = await
+               _menuService.GetMenuByIdAsync(menuItemId);
 
                 if (menuItem == null)
                 {
@@ -143,75 +146,127 @@ namespace FastFoodHouse_API.Controller
                     return NotFound(_response);
                 }
 
-                if (shoppingCart == null && updateQuatityBy > 0)
+                if (shoppingCartDTO == null && updateQuatityBy > 0)
                 {
-                    ShoppingCart newCart = new ShoppingCart() { UserId = userId };
-                    _db.ShoppingCarts.Add(newCart);
-                    await _db.SaveChangesAsync();
+                    ShoppingCartCreateDTO newCart = new ShoppingCartCreateDTO() { UserId = userId };
+                    _shoppingCartService.CreateShoppingCart(newCart);
 
-                    CartItem newItem = new CartItem()
+                    CartItemCreateDTO newItem = new CartItemCreateDTO()
                     {
                         MenuItemId = menuItemId,
                         Quantity = updateQuatityBy,
-                        ShoppingCartId = newCart.id,
-                        MenuItem = null
+                        ShoppingCartId = newCart.Id,
                     };
-                    _db.CartItems.Add(newItem);
-                    await _db.SaveChangesAsync();
+                    _cartItemService.AddItemToCart(newItem);
+                    
                 }
                 else
                 {
                     // Shopping cart exist
-                    CartItem? itemInCart = await _db.CartItems.FirstOrDefaultAsync(u => u.MenuItemId == menuItemId);
+                    CartItemDTO? itemInCart = await _cartItemService.GetCartItemById(menuItemId);
                     // Item does not exits in current cart
                     if (itemInCart == null)
                     {
-                        CartItem newItem = new CartItem()
+                        CartItemCreateDTO newItem = new CartItemCreateDTO()
                         {
                             MenuItemId = menuItemId,
                             Quantity = updateQuatityBy,
-                            ShoppingCartId = shoppingCart.id,
-                            MenuItem = null
+                            ShoppingCartId = shoppingCartDTO.Id,
                         };
-                        _db.CartItems.Add(newItem);
-                        await _db.SaveChangesAsync();
+                        _cartItemService.AddItemToCart(newItem);
                     }
                     else
                     {
                         // item exist in current cart
                         int newQuantity = itemInCart.Quantity + updateQuatityBy;
-                        if (updateQuatityBy == 0  || newQuantity <= 0)
+                        if (updateQuatityBy == 0 || newQuantity <= 0)
                         {
                             // remove item from the cart and if it is the only item then remove the shoppingcart
-                            _db.CartItems.Remove(itemInCart);
-                            if(shoppingCart.CartItems.Count() == 1)
+                            _cartItemService.RemoveItemInCart(itemInCart);
+                            //_db.CartItems.Remove(itemInCart);
+                            if (shoppingCartDTO.CartItemDTO.Count() == 0)
                             {
-                                _db.ShoppingCarts.Remove(shoppingCart);
+                                //_db.ShoppingCarts.Remove(shoppingCart);
+                                _shoppingCartService.RemoveCart(shoppingCartDTO);
                             }
-                            await _db.SaveChangesAsync();
                         }
                         else
                         {
                             itemInCart.Quantity = newQuantity;
                         }
-                       await  _db.SaveChangesAsync();
+                        //await _db.SaveChangesAsync();
+                        _shoppingCartService.SaveChangesAsync();
                     }
 
                 }
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Result = shoppingCart;
+                _response.Result = shoppingCartDTO;
                 return Ok(_response);
             }
             catch (Exception ex)
             {
                 _response.IsSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.ErrorMessages = new List<string> {ex.ToString()};
+                _response.ErrorMessages = new List<string> { ex.ToString() };
             }
 
             return BadRequest(_response);
 
         }
+
+
+        //[HttpPost]
+
+        //public async Task<IActionResult> AddShoppingCart(string userId, int menuItemId,  int updateQuantityBy)
+        //{
+        //    ShoppingCartCreateDTO createShoopingCartDTO;
+        //    IEnumerable<ShoppingCartDTO> shoppingCartDTO = await _shoppingCartService.GetShoppingCart(userId);
+
+        //    MenuDTO  menuItem = await _menuService.GetMenuByIdAsync(menuItemId);
+
+        //    if (menuItem == null)
+        //    {
+        //        _response.StatusCode=HttpStatusCode.NotFound;
+        //        _response.IsSuccess = false;
+        //        return NotFound(_response);
+        //    }
+
+        //    if (shoppingCartDTO == null && updateQuantityBy > 0)
+        //    {
+        //        ShoppingCartCreateDTO addOrUpdateShoppingCart = new() { UserId = userId };
+
+        //        createShoopingCartDTO = await _shoppingCartService.AddOrUpdateShoppingCart(addOrUpdateShoppingCart);
+
+        //        CartItemCreateDTO cartDTO = new CartItemCreateDTO()
+        //        {
+        //            MenuItemId = menuItemId,
+        //            Quantity = updateQuantityBy,
+        //            ShoppingCartId = createShoopingCartDTO.Id
+        //        };
+
+
+        //        _cartItemService.AddItemToCart(cartDTO);
+
+        //    }
+        //    else
+        //    {
+
+        //        CartItemDTO cartItemDTO = await _cartItemService.GetCartItemById(menuItemId);
+        //        IEnumerable<ShoppingCartDTO> getshoppingCartDTO = await _shoppingCartService.GetShoppingCart(createShoopingCartDTO.UserId);
+        //        if(cartItemDTO == null)
+        //        {
+        //            cartItemDTO = new CartItemDTO()
+        //            {
+        //                MenuItemId = menuItemId,
+        //                Quantity = updateQuantityBy,
+        //                ShoppingCartId = createShoopingCartDTO.Id,
+
+        //            };
+        //        }
+        //    }
+        //    return Created();
+
+        //}
 
 
 

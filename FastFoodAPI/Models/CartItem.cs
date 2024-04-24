@@ -8,7 +8,7 @@ namespace FastFoodHouse_API.Models
         public int id {  get; set; } 
         public int MenuItemId { get; set; }
         [ForeignKey("MenuItemId")]
-        public MenuItem MenuItem { get; set; } = new MenuItem();
+        public MenuItemDTO MenuItem { get; set; }
         public int Quantity  { get; set; }
         public int ShoppingCartId { get; set; }
     }

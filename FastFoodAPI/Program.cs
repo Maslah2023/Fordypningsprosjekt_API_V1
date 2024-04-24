@@ -30,6 +30,12 @@ builder.Services.AddIdentity<Customer, IdentityRole>().AddEntityFrameworkStores<
 
 IServiceCollection serviceCollection = builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Appsetnings:JwtOptions"));
+builder.Services.AddScoped<ICartItemService, CartItemService>();
+builder.Services.AddScoped<ICartItemRepo, CartItemRepo>();
+builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>(); 
+builder.Services.AddScoped<IShoppingCartRepo, ShoppingCartRepo>();
+builder.Services.AddScoped<IMenuService, MenuItemService>();
+builder.Services.AddScoped<IMenuRepo, MenuRepo>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrderRepo, OrderRepo>();
 builder.Services.AddScoped<ICustomerRepo, CustomerRepo>();

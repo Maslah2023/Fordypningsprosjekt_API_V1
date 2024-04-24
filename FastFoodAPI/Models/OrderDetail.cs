@@ -14,7 +14,7 @@ namespace FastFoodHouse_API.Models
         [Required]
         public int MenuItemId { get; set; }
         [ForeignKey("MenuItemId")]
-        public MenuItem? MenuItem { get; set; }
+        public MenuItemDTO? MenuItem { get; set; }
         [Required]
         public int Quantity { get; set; }
         [Required]

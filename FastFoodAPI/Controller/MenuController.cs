@@ -116,7 +116,7 @@ namespace FastFoodHouse_API.Controller
         [HttpPost]
         public async Task<ActionResult<ApiResponse>> CreateMenu(CreateMenuDTO createMenuDTO)
         {
-            MenuItem newMenuItem;
+            MenuItemDTO newMenuItem;
             try 
             { 
             if(createMenuDTO == null) 
@@ -126,7 +126,7 @@ namespace FastFoodHouse_API.Controller
                 return _apiResponse;
             }
 
-             newMenuItem = new MenuItem()
+             newMenuItem = new MenuItemDTO()
             {
                 Name = createMenuDTO.Name,
                 Description = createMenuDTO.Description,
@@ -162,7 +162,7 @@ namespace FastFoodHouse_API.Controller
                     return _apiResponse;
                 }
 
-                MenuItem menuItem = _db.Menu.Find(id);
+                MenuItemDTO menuItem = _db.Menu.Find(id);
                 if (menuItem == null)
                 {
                     _apiResponse.StatusCode = HttpStatusCode.NotFound;
