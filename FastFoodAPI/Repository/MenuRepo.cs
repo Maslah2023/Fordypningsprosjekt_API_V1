@@ -12,9 +12,9 @@ namespace FastFoodHouse_API.Repository
         {
             _db = db;
         }
-        public void AddMenu(MenuItemDTO item)
+        public void AddMenu(MenuItem item)
         {
-            MenuItemDTO menuItem = new()
+            MenuItem menuItem = new()
             {
                 Id = item.Id,
 
@@ -26,14 +26,14 @@ namespace FastFoodHouse_API.Repository
             throw new NotImplementedException();
         }
 
-        public Task<MenuItemDTO> GetAllMenues()
+        public Task<MenuItem> GetAllMenues()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<MenuItemDTO> GetMenuById(int menuId)
+        public async Task<MenuItem> GetMenuById(int menuId)
         {
-            MenuItemDTO? menu = await _db.Menu.FindAsync(menuId);
+            MenuItem? menu = await _db.Menu.FindAsync(menuId);
             return menu;
         }
 

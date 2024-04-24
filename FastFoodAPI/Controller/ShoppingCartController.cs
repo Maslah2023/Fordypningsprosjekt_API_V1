@@ -86,7 +86,7 @@ namespace FastFoodHouse_API.Controller
 
 
         [HttpGet]
-        public async Task<IActionResult> GetShoppingCart(string userId)
+        public async Task<ActionResult<ShoppingCartDTO>> GetShoppingCart(string userId)
         {
         
 
@@ -106,7 +106,7 @@ namespace FastFoodHouse_API.Controller
 
                 _response.Result = shoppingCarts;
                 _response.StatusCode = HttpStatusCode.OK;
-                return Ok(_response);
+                return Ok(shoppingCarts);
 
             }
             catch (Exception ex)
@@ -125,7 +125,7 @@ namespace FastFoodHouse_API.Controller
 
 
         [HttpPost]
-        public async Task<ActionResult<ApiResponse>> AddOrUpdateCart(string userId, int menuItemId, int updateQuatityBy)
+        public async Task<ActionResult<ShoppingCartDTO>> AddOrUpdateCart(string userId, int menuItemId, int updateQuatityBy)
         {
             try
             {
@@ -134,6 +134,7 @@ namespace FastFoodHouse_API.Controller
                 //.Include(u => u.CartItems)
                 //.FirstOrDefaultAsync(u => u.UserId == userId);
                ShoppingCartDTO shoppingCartDTO = await _shoppingCartService.GetShoppingCart(userId);
+          
           
 
                 MenuDTO? menuItem = await
@@ -163,7 +164,7 @@ namespace FastFoodHouse_API.Controller
                 else
                 {
                     // Shopping cart exist
-                    CartItemDTO? itemInCart = await _cartItemService.GetCartItemById(menuItemId);
+                   CartItemDTO? itemInCart = shoppingCartDTO.CartItemDTO.SingleOrDefault(u => u.MenuItemId == menuItemId);
                     // Item does not exits in current cart
                     if (itemInCart == null)
                     {
@@ -201,7 +202,7 @@ namespace FastFoodHouse_API.Controller
                 }
                 _response.StatusCode = HttpStatusCode.OK;
                 _response.Result = shoppingCartDTO;
-                return Ok(_response);
+                return Ok(shoppingCartDTO);
             }
             catch (Exception ex)
             {

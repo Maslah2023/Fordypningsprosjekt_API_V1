@@ -8,7 +8,7 @@ namespace FastFoodHouse_API.Mapper
     {
         public MenuMapper()
         {
-            CreateMap<MenuItemDTO, MenuDTO>().ReverseMap();    
+            CreateMap<MenuItem, MenuDTO>().ReverseMap();    
         }
     }
 }

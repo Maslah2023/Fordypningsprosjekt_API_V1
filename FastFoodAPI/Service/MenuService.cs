@@ -17,7 +17,7 @@ namespace FastFoodHouse_API.Service
             _mapper = mapper;   
             
         }
-        public void AddMenu(MenuItemDTO item)
+        public void AddMenu(MenuItem item)
         {
             _menuRepo.AddMenu(item);
         }

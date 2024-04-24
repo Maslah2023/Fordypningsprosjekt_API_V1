@@ -24,7 +24,7 @@ namespace FastFoodHouse_API.Service
 
         public async Task<CartItemDTO> GetCartItemById(int id)
         {
-            CartItemDTO cartItemDTO = _mapper.Map<CartItemDTO>(await _cartItemRepo.CartItemAsync(id));
+            CartItemDTO cartItemDTO = _mapper.Map<CartItemDTO>(await _cartItemRepo.GetItemInCartAsync(id));
             return cartItemDTO;
         }
 

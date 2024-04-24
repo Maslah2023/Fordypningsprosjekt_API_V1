@@ -19,9 +19,11 @@ namespace FastFoodHouse_API.Repository
             _db.SaveChanges();
         }
 
-        public async Task<CartItem> CartItemAsync(int id)
+
+
+        public Task<CartItem> GetItemInCartAsync(int menuItemId)
         {
-            return await _db.CartItems.FirstOrDefaultAsync(u => u.MenuItemId == id);
+            throw new NotImplementedException();
         }
 
         public void RemoveItemInCart(CartItem cartItem)

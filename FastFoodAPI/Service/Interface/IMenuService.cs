@@ -7,7 +7,7 @@ namespace FastFoodHouse_API.Service.Interface
     {
         Task<MenuDTO> GetAllMenuesAsync();
         Task<MenuDTO> GetMenuByIdAsync(int menuId);
-        void AddMenu(MenuItemDTO item);
+        void AddMenu(MenuItem item);
         void UpdateMenu(int menuId);
         void DeleteMenu(int menuId);
     }

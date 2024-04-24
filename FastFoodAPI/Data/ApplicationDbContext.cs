@@ -14,7 +14,7 @@ namespace FastFoodHouse_API.Data
         }
 
 
-        public DbSet<MenuItemDTO> Menu { get; set; }
+        public DbSet<MenuItem> Menu { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
@@ -24,7 +24,7 @@ namespace FastFoodHouse_API.Data
         protected override void OnModelCreating(ModelBuilder modelbuilder)
         {
             base.OnModelCreating(modelbuilder);
-            modelbuilder.Entity<MenuItemDTO>().HasData(new MenuItemDTO
+            modelbuilder.Entity<MenuItem>().HasData(new MenuItem
             {
                 Id = 1,
                 Name = "Spring Roll",   
@@ -33,8 +33,8 @@ namespace FastFoodHouse_API.Data
                 Price = 7.99,
                 Category = "Appetizer",
                 SpecialTag = ""
-            }, new MenuItemDTO
-            {
+            }, new MenuItem
+            {   
                 Id = 2,
                 Name = "Idli",
                 Description = "Fusc tincidunt maximus leo, sed scelerisque massa auctor sit amet. Donec ex mauris, hendrerit quis nibh ac, efficitur fringilla enim.",
@@ -42,7 +42,7 @@ namespace FastFoodHouse_API.Data
                 Price = 8.99,
                 Category = "Appetizer",
                 SpecialTag = ""
-            }, new MenuItemDTO
+            }, new MenuItem
             {
                 Id = 3,
                 Name = "Panu Puri",
@@ -51,7 +51,7 @@ namespace FastFoodHouse_API.Data
                 Price = 8.99,
                 Category = "Appetizer",
                 SpecialTag = "Best Seller"
-            }, new MenuItemDTO
+            }, new MenuItem
             {
                 Id = 4,
                 Name = "Hakka Noodles",
@@ -60,7 +60,7 @@ namespace FastFoodHouse_API.Data
                 Price = 10.99,
                 Category = "Entrée",
                 SpecialTag = ""
-            }, new MenuItemDTO
+            }, new MenuItem
             {
                 Id = 5,
                 Name = "Malai Kofta",
@@ -69,7 +69,7 @@ namespace FastFoodHouse_API.Data
                 Price = 12.99,
                 Category = "Entrée",
                 SpecialTag = "Top Rated"
-            }, new MenuItemDTO
+            }, new MenuItem
             {
                 Id = 6,
                 Name = "Paneer Pizza",
@@ -78,7 +78,7 @@ namespace FastFoodHouse_API.Data
                 Price = 11.99,
                 Category = "Entrée",
                 SpecialTag = ""
-            }, new MenuItemDTO
+            }, new MenuItem
             {
                 Id = 7,
                 Name = "Paneer Tikka",
@@ -87,7 +87,7 @@ namespace FastFoodHouse_API.Data
                 Price = 13.99,
                 Category = "Entrée",
                 SpecialTag = "Chef's Special"
-            }, new MenuItemDTO
+            }, new MenuItem
             {
                 Id = 8,
                 Name = "Carrot Love",
@@ -96,7 +96,7 @@ namespace FastFoodHouse_API.Data
                 Price = 4.99,
                 Category = "Dessert",
                 SpecialTag = ""
-            }, new MenuItemDTO
+            }, new MenuItem
             {
                 Id = 9,
                 Name = "Rasmalai",
@@ -105,7 +105,7 @@ namespace FastFoodHouse_API.Data
                 Price = 4.99,
                 Category = "Dessert",
                 SpecialTag = "Chef's Special"
-            }, new MenuItemDTO
+            }, new MenuItem
             {
                 Id = 10,
                 Name = "Sweet Rolls",

@@ -4,9 +4,9 @@ namespace FastFoodHouse_API.Repository.Interface
 {
     public interface IMenuRepo
     {
-        Task<MenuItemDTO> GetAllMenues();
-        Task<MenuItemDTO> GetMenuById(int menuName);
-        void AddMenu(MenuItemDTO item);
+        Task<MenuItem> GetAllMenues();
+        Task<MenuItem> GetMenuById(int menuName);
+        void AddMenu(MenuItem item);
         void UpdateMenu(int menuId);
         void DeleteMenu(int menuId);
         
