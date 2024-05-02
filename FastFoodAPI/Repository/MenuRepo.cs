@@ -1,34 +1,60 @@
 ﻿using FastFoodHouse_API.Data;
 using FastFoodHouse_API.Models;
 using FastFoodHouse_API.Repository.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace FastFoodHouse_API.Repository
 {
     public class MenuRepo : IMenuRepo
     {
         private readonly ApplicationDbContext _db;
+        private readonly ILogger<MenuRepo> _logger;
 
-        public MenuRepo(ApplicationDbContext db)
+        public MenuRepo(ApplicationDbContext db, ILogger<MenuRepo> logger)
         {
             _db = db;
+            _logger = logger;
         }
-        public void AddMenu(MenuItem item)
+        public async Task<MenuItem>AddMenu(MenuItem item)
         {
-            MenuItem menuItem = new()
+            try
             {
-                Id = item.Id,
-
-            }; 
+                _db.Menu.Add(item);
+               await _db.SaveChangesAsync();
+                return item;
+            }
+            catch(Exception ex) 
+            {
+               _logger.LogError(ex, "Internal Server Error");
+                throw;
+            }   
         }
 
-        public void DeleteMenu(int menuId)
+        public async Task<MenuItem> DeleteMenu(int menuId)
         {
-            throw new NotImplementedException();
+            try
+            {
+              var menuItem = await _db.Menu.FindAsync(menuId);
+              if (menuItem == null)
+              {
+                    return null;
+              }
+              _db.Menu.Remove(menuItem);
+              await _db.SaveChangesAsync();
+               return menuItem;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal Server Error");
+                throw;
+            }
+          
         }
 
-        public Task<MenuItem> GetAllMenues()
+        public async Task<IEnumerable<MenuItem>> GetAllMenues()
         {
-            throw new NotImplementedException();
+            var  menuItems =  await _db.Menu.ToListAsync();
+            return menuItems;
         }
 
         public async Task<MenuItem> GetMenuById(int menuId)

@@ -1,6 +1,9 @@
-﻿using FastFoodHouse_API.Data;
+﻿using FastFoodAPI.Utility;
+using FastFoodHouse_API.Data;
 using FastFoodHouse_API.Models;
 using FastFoodHouse_API.Models.Dtos;
+using FastFoodHouse_API.Service.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,142 +17,87 @@ namespace FastFoodHouse_API.Controller
     {
         private readonly ApplicationDbContext _db;
         private readonly ApiResponse _apiResponse;
+        private readonly IMenuService _menuService;
+        private readonly ILogger<MenuController> _logger;
 
         // Constructor: Initializes the MenuController with an instance of ApplicationDbContext.
         // Also initializes an ApiResponse object for handling API responses.
-        public MenuController(ApplicationDbContext db)
+        public MenuController(ApplicationDbContext db, IMenuService menuService, ILogger<MenuController> logger)
         {
             _db = db;
             _apiResponse = new ApiResponse();
+            _menuService = menuService;
+            _logger = logger;
         }
-
-        //// HTTP GET endpoint for retrieving menu items.
-        //[HttpGet]
-        //public IActionResult GetMenuItems()
-        //{
-        //    try
-        //    {
-        //        // Try to retrieve menu items from the database and assign them to ApiResponse.Result.
-        //        _apiResponse.Result = _db.Menu;
-
-        //        // Set the HTTP status code to 200 OK.
-        //        _apiResponse.StatusCode = HttpStatusCode.OK;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // If an exception occurs, set ApiResponse properties to indicate an error.
-        //        _apiResponse.IsSuccess = false;
-        //        _apiResponse.ErrorMessages = new List<string> { ex.Message };
-        //    }
-
-        //    // Return an OkObjectResult with the ApiResponse, which includes menu items or error information.
-        //    return Ok(_apiResponse);
-        //}
-
-
-        //[HttpGet("{id}")]
-        //public async Task<IActionResult> GetMenuItemById(int id)
-        //{
-        //    if(id == 0) 
-        //    {
-        //        _apiResponse.IsSuccess=false;
-        //        _apiResponse.StatusCode=HttpStatusCode.NotFound;
-        //        return Ok(_apiResponse);
-        //    }
-
-        //        _apiResponse.StatusCode =HttpStatusCode.OK;
-        //        _apiResponse.Result = await _db.Menu.FindAsync(id);
-
-        //    return Ok(_apiResponse);
-        //}
 
 
        [HttpGet]
 
-       public async Task<IActionResult> GetAllMenuItems()
+       public async Task<ActionResult<ApiResponse>> GetAllMenuItems()
        {
             try
             {
-                _apiResponse.Result = _db.Menu;
-                _apiResponse.StatusCode = HttpStatusCode.OK;
+                var menuItems = await _menuService.GetAllMenuesAsync();
+                if(menuItems == null)
+                {
+                    return NotFound();
+                }
+                _apiResponse.Result = menuItems;
+                return Ok(_apiResponse);
             }
             catch (Exception ex)
             {
-                _apiResponse.ErrorMessages =  new List<string> { ex.Message };
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                return BadRequest(_apiResponse);
+                _logger.LogError(ex, $"Internal Server Error");
+                return BadRequest();
             }
-
-            return Ok(_apiResponse);
-       }
+            
+        }
 
 
 
         [HttpGet("{id}")]
 
-        public async Task<IActionResult> GetMenuItemById(int id)
+        public async Task<ActionResult<MenuDTO>> GetMenuItemById(int id)
         {
             try
             {
-                var menuItem = await 
-                _db.Menu.FirstOrDefaultAsync(x => x.Id == id);
+                var menuItem = await
+                _menuService.GetMenuByIdAsync(id);
                 if (menuItem == null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode= HttpStatusCode.NotFound;
-                    return BadRequest(_apiResponse);
+                    return NotFound();
                 }
-                _apiResponse.Result = menuItem;
-                _apiResponse.StatusCode = HttpStatusCode.Created;
+                return Ok(menuItem);
             }
             catch (Exception ex)
             {
-                _apiResponse.IsSuccess=false;
-                _apiResponse.ErrorMessages = new List<string> { ex.Message};
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                return BadRequest(_apiResponse);
+                _logger.LogError(ex, $"Internal Server Error");
+                return BadRequest();
             }
-            return Ok(_apiResponse);
+            
         }
 
+
+    
         [HttpPost]
-        public async Task<ActionResult<ApiResponse>> CreateMenu(CreateMenuDTO createMenuDTO)
+        public async Task<ActionResult<MenuDTO>> CreateMenu(CreateMenuDTO createMenuDTO)
         {
-            MenuItem newMenuItem;
-            try 
-            { 
-            if(createMenuDTO == null) 
+            
+            try
             {
-                _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                _apiResponse.IsSuccess = false;
-                return _apiResponse;
+                   var menuDTO = await _menuService.AddMenu(createMenuDTO);
+                    return Ok(menuDTO);
             }
-
-             newMenuItem = new MenuItem()
+            catch (Exception ex)
             {
-                Name = createMenuDTO.Name,
-                Description = createMenuDTO.Description,
-                Image = createMenuDTO.Image,
-                Price = createMenuDTO.Price,
-                Category = createMenuDTO.Category,
-                SpecialTag = createMenuDTO.SpecialTag
-            };
-            _db.Menu.Add(newMenuItem);
-             await _db.SaveChangesAsync();
-            } catch (Exception ex)
-            {
-                _apiResponse.IsSuccess=false;
-                _apiResponse.StatusCode=HttpStatusCode.InternalServerError;
-                _apiResponse.ErrorMessages = new List<string> { ex.Message};
-                return _apiResponse;
+                _logger.LogError(ex, $"Internal Server Error");
+                return BadRequest();
             }
-            _apiResponse.StatusCode = HttpStatusCode.OK;
-            return _apiResponse;
+           
         }
 
 
-
+        [Authorize(Roles = SD.Role_Admin)]
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse>> UpdateMenu(int id, MenuUpdateDTO menuUpdateDTO)
         {
@@ -188,13 +136,25 @@ namespace FastFoodHouse_API.Controller
             {
                 _apiResponse.StatusCode= HttpStatusCode.InternalServerError;
                 _apiResponse.IsSuccess=false;
-                _apiResponse.ErrorMessages.Add(ex.Message);
-
+                _apiResponse.Message = "Internal Server Error";
             }
             return _apiResponse;
-           
+        }
 
 
+        [HttpDelete("{id}")]
+        public  async Task<ActionResult<MenuDTO>> DeleteMenu(int id)
+        {
+            try
+            {
+               MenuDTO menuDTO= await _menuService.DeleteMenu(id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Internal Server Error");
+                return BadRequest();
+            }
         }
         
     }

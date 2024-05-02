@@ -27,7 +27,7 @@ namespace FastFoodHouse_API.Service
 
             var claimList = new List<Claim>
             {
-                new Claim("id", applicationUser.Id),
+                new Claim(JwtRegisteredClaimNames.Sub,applicationUser.Id),
                 new Claim(JwtRegisteredClaimNames.Email, applicationUser.UserName),
                 new Claim(JwtRegisteredClaimNames.Name, applicationUser.Name),
             };
@@ -36,6 +36,8 @@ namespace FastFoodHouse_API.Service
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
+                Audience = _jwtOptions.Audience,
+                Issuer = _jwtOptions.Issuer,
                 Subject = new ClaimsIdentity(claimList),
                 Expires = DateTime.UtcNow.AddDays(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

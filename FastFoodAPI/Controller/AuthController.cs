@@ -24,50 +24,19 @@ namespace FastFoodHouse_API.Controller
 
 
 
-
-
-
-
-        //[HttpGet("{id}")]
-        //public async Task<IActionResult> GetUserById(string id)
-        //{
-        //    var userToReturn = await _authService.GetCustomerById(id);
-        //    if (userToReturn == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    _response.Result = userToReturn;
-        //    return Ok(_response);
-        //}
-
-
-        //[HttpGet]
-        //public async Task<IActionResult> GetAllUsers()
-        //{
-        //    var users = await _authService.GetAllUsers();
-        //    if (users == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    _response.Result = users;
-        //    return Ok(_response);
-        //}
-
-
-
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequestDTO model)
         {
             var erroMessage = await _authService.Register(model);
             if (!string.IsNullOrEmpty(erroMessage))
             {
-                _response.ErrorMessages = new List<string> { erroMessage.ToString() };
+                _response.Message = erroMessage;
                 return Ok(_response);
             }
             else
             {
                 _response.StatusCode = System.Net.HttpStatusCode.OK;
-                _response.ErrorMessages = new List<string> { erroMessage.ToString() };
+                _response.Message = erroMessage;
                 _response.IsSuccess = true;    
             }
             return BadRequest(_response);
@@ -81,7 +50,7 @@ namespace FastFoodHouse_API.Controller
             {
                 _response.StatusCode = System.Net.HttpStatusCode.Unauthorized;
                 _response.IsSuccess = false;
-                _response.ErrorMessages = new List<string> { "Username or Password is incorrect" };
+                _response.Message = "Username or Password is incorrect";
             }
             else
             {
@@ -90,23 +59,6 @@ namespace FastFoodHouse_API.Controller
     
             return Ok(_response);
         }
-
-
-
-        //[HttpDelete("{userId}")]
-        //public async Task<IActionResult> DeleteUser(string userId)
-        //{
-        //    var user = await _authService.DeleteUser(userId);
-        //    if (user == "")
-        //    {
-        //        return Ok();
-        //    }
-        //    return BadRequest();
-        //}
-
-
-       
-
 
 
     }

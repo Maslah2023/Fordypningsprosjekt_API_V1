@@ -8,8 +8,8 @@ namespace FastFoodHouse_API.Service.Interface
     {
         public Task<IEnumerable<Customer>> GetAllCustomers();
         public Task<Customer> GetCustomerById(string customerId);
-        public void DeleteCustomer(string customrId);
-        public void UpdateCustomer(string customerId, UpdateCustomerDTO user);
+        public Task<Customer> DeleteCustomer(string customrId);
+        public Task<Customer> UpdateCustomer(string customerId, UpdateCustomerDTO user, string currentPassword, string newPassword);
 
 
     }

@@ -11,19 +11,16 @@ namespace FastFoodHouse_API.Repository
         private readonly ApplicationDbContext _db;
         private readonly UserManager<Customer> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ILogger<CustomerRepo> _logger;
 
-        public CustomerRepo(ApplicationDbContext db, UserManager<Customer> userManager, RoleManager<IdentityRole> roleManager)
+        public CustomerRepo(ApplicationDbContext db, UserManager<Customer> userManager, RoleManager<IdentityRole> roleManager, ILogger<CustomerRepo> logger)
         {
             _db = db;
             _userManager = userManager;
             _roleManager = roleManager;
+            _logger = logger;
         }
-        //public  void DeleteCustomerB(string customrId)
-        //{
-        //    var customerToDelete = _db.Customers.FirstOrDefault(x => x.Id == customrId);
-        //    _db.Customers.Remove(customerToDelete);
-
-        //}
+     
         
 
         public async Task<IEnumerable<Customer>> GetAllCustomers()
@@ -66,30 +63,47 @@ namespace FastFoodHouse_API.Repository
             }
         }
 
-        public async Task<Customer> UpdateCustomerById(string customerId,Customer user)
+        public async Task<Customer> UpdateCustomerById(string customerId, Customer user, string currentPassword, string newPassword)
         {
             try
             {
-                
-                var customer = await
-               _db.Customers.FirstOrDefaultAsync(u => u.Id == customerId);
-                customer.Id = user.Id;
-                customer.UserName = user.UserName;
-                customer.Email = user.Email;
-                customer.PhoneNumber = user.PhoneNumber;
-
-                _db.Customers.Update(customer);
-                await _db.SaveChangesAsync();
-                return customer;
+                Customer customer = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == customerId);
+                //IdentityResult result;
+                if (customer != null)
+                {
+                    customer.Name = user.Name;
+                    customer.UserName = user.UserName;
+                    customer.NormalizedUserName = user.UserName;
+       
+                }
+                IdentityResult result = await _userManager.UpdateAsync(customer);
+                if (result.Succeeded)
+                {
+                    bool isPasswordValid = await _userManager.CheckPasswordAsync(customer, currentPassword);
+                    if (isPasswordValid)
+                    {
+                        var changePasswordResult = await _userManager.ChangePasswordAsync(customer, currentPassword, newPassword);
+                        if (changePasswordResult.Succeeded)
+                        {
+                            await _db.SaveChangesAsync();
+                            return customer;
+                        }
+                    }
+                   
+                }
+                else
+                {
+                    // Customer not found
+                    return null;
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occured while updating: {ex.Message}");
-                return null;
+                _logger.LogError(($"An error occurred while updating: {ex.Message}"));
             }
+            return null;
 
-
-        }
+         }
 
 
 
@@ -98,12 +112,12 @@ namespace FastFoodHouse_API.Repository
         {
             try
             {
-            var customer = _db.Customers.SingleOrDefault(x => x.Id == customerId);
+            var customer = await _userManager.FindByIdAsync(customerId);
                 if (customer == null)
                 {
                     return null;
                 }
-                _db.Customers.Remove(customer);
+               await  _userManager.DeleteAsync(customer);
                 return customer;
             }
             catch (Exception ex)
@@ -114,7 +128,9 @@ namespace FastFoodHouse_API.Repository
 
         }
 
-
-
+        public void UpdateAsync(Customer customer)
+        {
+            _userManager.UpdateAsync(customer);
+        }
     }
 }

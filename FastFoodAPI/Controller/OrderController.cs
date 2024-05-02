@@ -3,6 +3,7 @@ using FastFoodHouse_API.Data;
 using FastFoodHouse_API.Models;
 using FastFoodHouse_API.Models.Dtos;
 using FastFoodHouse_API.Service.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,113 +27,28 @@ namespace FastFoodHouse_API.Controller
         }
 
 
-        //[HttpGet]
-
-        //public async Task<IActionResult> GetOrders(string userId, string searchString, string status, int pageNumber = 1, int pageSize = 5)
-        //{
-        //    try
-        //    {
-        //        IEnumerable<OrderHeader> orderHeaders =
-        //       _db.OrderHeaders.Include(_ => _.OrderDetails)
-        //       .ThenInclude(_ => _.MenuItem)
-        //       .OrderByDescending(u => u.OrderheaderId);
-
-        //        if (!string.IsNullOrEmpty(userId))
-        //        {
-        //            orderHeaders = 
-        //           _db.OrderHeaders
-        //           .Where(u => u.ApplicationUserId == userId);
-        //        }
-
-        //        if(!string.IsNullOrEmpty(status))
-        //        {
-        //            orderHeaders = _db.OrderHeaders.Where(u => u.Status.ToLower() == status.ToLower());
-        //        }
-
-
-        //        if (!string.IsNullOrEmpty(searchString))
-        //        {
-        //            orderHeaders = _db.OrderHeaders.Where(u => u.PickUpPhoneNumber.ToLower() == searchString.ToLower()
-        //            || u.PickupName.ToLower() == searchString.ToLower()
-        //            || u.PickupEmail == searchString.ToLower());
-        //        }
-
-        //        Pagination pagination = new()
-        //        {
-        //            CurrentPage = pageNumber,
-        //            PageSize = pageSize,
-        //            TotalRecords = orderHeaders.Count()
-
-        //        };
-
-        //        Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
-
-        //        _apiResponse.Result = orderHeaders;
-        //        _apiResponse.StatusCode = System.Net.HttpStatusCode.OK;
-        //        return Ok(_apiResponse);
-
-
-        //    }
-        //    catch(Exception ex) 
-        //    {
-        //        _apiResponse.ErrorMessages = new List<string> { ex.Message };
-        //        _apiResponse.IsSuccess = false;
-        //    }
-
-        //    return BadRequest(_apiResponse);
-
-        //}
-
+  
 
         [HttpPost]
         public async Task<IActionResult> CreateOrder(OrderHeaderDTO orderHeaderDTO)
         {
             try
             {
-                //OrderHeader order = new OrderHeader()
-                //{
-                //    ApplicationUserId = orderHeaderDTO.ApplicationUserId,
-                //    PickupName = orderHeaderDTO.PickupName,
-                //    PickupEmail = orderHeaderDTO.PickupEmail,
-                //    PickUpPhoneNumber = orderHeaderDTO.PickUpPhoneNumber,
-                //    OrderDate = DateTime.Now,
-                //    StripePaymentIntentID = orderHeaderDTO.StripePaymentIntentID,
-                //    TotalItems = orderHeaderDTO.TotalItems,
-                //    Status = string.IsNullOrEmpty(orderHeaderDTO.Status)? SD.status_pending : orderHeaderDTO.Status,
-                //};
-
-                //_db.OrderHeaders.Add(order);
-                //await _db.SaveChangesAsync();
-                //foreach (var orderDetailsDTO in orderHeaderDTO.OrderDetails)
-                //{
-                //    OrderDetailDTO orderDetail = new OrderDetailDTO()
-                //    {
-                //        MenuItemId = orderDetailsDTO.MenuItemId,
-                //        ItemName = orderDetailsDTO.ItemName,
-                //        Price = orderDetailsDTO.Price,
-                //        OrderHeaderId = orderDetailsDTO.OrderHeaderId,
-                //        Quantity = orderDetailsDTO.Quantity,
-                //    };
-                //    _db.orderDetails.Add(orderDetail);
-                //}
-                //await _db.SaveChangesAsync();
-                //_apiResponse.Result = order;
-                //order.OrderDetails = null;
-                //_apiResponse.StatusCode = System.Net.HttpStatusCode.Created;
-                //return Ok(_apiResponse);
+               
                 var createdOrder = _orderService.CreateOrder(orderHeaderDTO);
 
             } catch (Exception ex)
 
             {
                 _apiResponse.IsSuccess = false;
-                _apiResponse.ErrorMessages = new List<string> { ex.Message };
+                _apiResponse.Message = "Internal Server Error";
             }
             return BadRequest(_apiResponse);
         }
 
+        //[Authorize]
         [HttpGet]
-        public async Task<ActionResult<ApiResponse>> GetOrders(string? userId)
+        public async Task<ActionResult<ApiResponse>> GetOrders(string userId)
         {
             try
             {
@@ -153,14 +69,14 @@ namespace FastFoodHouse_API.Controller
             {
                 _apiResponse.IsSuccess = false;
                 _apiResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
-                _apiResponse.ErrorMessages = new List<string> { ex.Message };
+                _apiResponse.Message = "Internal Server Error";
 
             }
             return _apiResponse;
 
         }
 
-
+        [Authorize(Roles = SD.Role_Admin)]
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ApiResponse>> GetorderById(int id)
         {
@@ -172,7 +88,7 @@ namespace FastFoodHouse_API.Controller
                     _apiResponse.StatusCode = System.Net.HttpStatusCode.BadRequest;
                     return BadRequest(_apiResponse);
                 }
-                OrderHeaderDTO? orderDTO = await
+                OrderHeaderDTO orderDTO = await
                 _orderService.GetOrderById(id);
                 if (orderDTO == null)
                 {
@@ -193,6 +109,7 @@ namespace FastFoodHouse_API.Controller
         }
 
 
+        
         [HttpPut("{id:int}")]
         public ActionResult<ApiResponse> UpdateOrderHeader(int id, OrderHeaderUpdateDTO orderHeaderUpdateDTO) 
         {

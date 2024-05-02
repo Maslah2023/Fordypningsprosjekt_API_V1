@@ -122,13 +122,17 @@ namespace FastFoodHouse_API.Service
                 {
                     // Creates role in database 
                     await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
-                    await _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer));
                     if (model.Role.ToLower() == SD.Role_Admin.ToLower())
                     {
 
                         await _userManager.AddToRoleAsync(newUser, SD.Role_Admin);
                     }
-                    else
+       
+                }
+                else
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer));
+                    if(model.Role.ToLower() == SD.Role_Customer.ToLower())
                     {
                         await _userManager.AddToRoleAsync(newUser, SD.Role_Customer);
                     }

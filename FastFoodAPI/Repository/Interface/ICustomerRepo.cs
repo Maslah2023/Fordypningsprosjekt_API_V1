@@ -11,8 +11,9 @@ namespace FastFoodHouse_API.Repository.Interface
         public Task<IEnumerable<Customer>> GetAllCustomers();
         public Task<Customer> GetCustomerById(string customerId);
         public  Task<Customer> DeleteCustomer(string customrId);
-        public Task<Customer> UpdateCustomerById(string customerId, Customer user);
+        public Task<Customer> UpdateCustomerById(string customerId, Customer user, string currentPassword, string newPassword);
 
+        void UpdateAsync(Customer customer);
 
     }
 }

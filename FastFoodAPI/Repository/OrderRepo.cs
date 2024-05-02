@@ -39,7 +39,7 @@ namespace FastFoodHouse_API.Repository
 
 
             }
-            catch 
+            catch (Exception ex)
             {
                 Console.WriteLine($"An error occured while retrieving");
                 return null;

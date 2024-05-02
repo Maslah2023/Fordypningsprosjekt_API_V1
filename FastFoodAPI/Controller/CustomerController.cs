@@ -1,24 +1,31 @@
-﻿using FastFoodHouse_API.Data;
+﻿using FastFoodAPI.Utility;
+using FastFoodHouse_API.Data;
+using FastFoodHouse_API.Models;
 using FastFoodHouse_API.Models.Dtos;
 using FastFoodHouse_API.Service;
 using FastFoodHouse_API.Service.Interface;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FastFoodHouse_API.Controller
 {
     [Route("api/customer")]
     [ApiController]
+
     public class CustomerController : ControllerBase
     {
         private readonly ICustomerService _customerService;
-        private readonly ApplicationDbContext _db;
-        protected ApiResponse apiResponse;
-        public CustomerController(ICustomerService customerService, ApplicationDbContext db)
+        private readonly ILogger<CustomerService> _logger;
+        protected ApiResponse _apiResponse;
+
+        public CustomerController(ICustomerService customerService, ILogger<CustomerController> logger)
         {
             _customerService = customerService;
-            apiResponse = new ApiResponse();
-            _db = db;
+            _apiResponse = new ApiResponse();
+            
         }
 
 
@@ -26,34 +33,80 @@ namespace FastFoodHouse_API.Controller
 
 
 
+        [Authorize(Roles = SD.Role_Admin)]
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<ActionResult<ApiResponse>> GetAllUsers()
         {
-            var users = await _customerService.GetAllCustomers();
-            if (users == null)
+            try
             {
-                return NotFound();
+                var users = await _customerService.GetAllCustomers();
+                if (users == null)
+                {
+                    return NotFound();
+                }
+                _apiResponse.Result = users;
+                _apiResponse.StatusCode = System.Net.HttpStatusCode.OK;
+                return Ok(_apiResponse);
             }
-            return Ok(users);
+            catch (Exception ex)
+            {
+                _logger.LogError($"An error occured while retrieving customers: {ex.Message}");
+                _apiResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                _apiResponse.Message = "Internal Server Error";
+                return _apiResponse;
+            
+            }
+           
         }
 
-
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(string id)
         {
-            var userToReturn = await _customerService.GetCustomerById(id);
-            if (userToReturn == null)
+
+        
+            // Retrieve the currently logged-in user's ID from claims
+            var currentUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (currentUser != id)
+            {
+                return Unauthorized();
+            }
+            var loginUser = await _customerService.GetCustomerById(id);
+            if (loginUser == null)
             {
                 return NotFound();
             }
-            return Ok(userToReturn);
+
+            return Ok(loginUser);
         }
 
+
+        //[Authorize(Roles = SD.Role_Admin  + "," + SD.Role_Customer)]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCustomerAsync(string id, UpdateCustomerDTO updateCustomerDTO)
+        public async Task<ActionResult<ApiResponse>> UpdateCustomerAsync(string id, UpdateCustomerDTO updateCustomerDTO, string currentPassword, string newPassword)
         {
-            _customerService.UpdateCustomer(id, updateCustomerDTO);
-            return Ok();
+            try
+            {
+                //string loggedInUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                //if(loggedInUser != id || loggedInUser == null) 
+                //{
+                //    _apiResponse.StatusCode = System.Net.HttpStatusCode.BadRequest;
+                //    _apiResponse.IsSuccess = false;
+                //    return BadRequest(_apiResponse);
+                //}
+                var customer = await _customerService.UpdateCustomer(id, updateCustomerDTO, currentPassword, newPassword);
+                _apiResponse.StatusCode = System.Net.HttpStatusCode.OK;
+                return NoContent();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError($"An error occured while retrieving customers: {ex.Message}");
+                _apiResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                _apiResponse.Message = "Internal Server Error";
+                return _apiResponse;
+
+            }
+           
         }
 
 
@@ -67,20 +120,20 @@ namespace FastFoodHouse_API.Controller
                 {
                     return BadRequest();
                 }
-                _customerService.DeleteCustomer(userId);
-                await _db.SaveChangesAsync();
+                Customer deletedCustomer =  await _customerService.DeleteCustomer(userId);
+                return Ok(deletedCustomer);
 
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
-                apiResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
-                apiResponse.IsSuccess = false;
-                return BadRequest(apiResponse);
-                
-            }
+                _apiResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                _apiResponse.IsSuccess = false;
+                return BadRequest(_apiResponse);
 
-            return NoContent();
+            }
             
+         
+
         }
 
 

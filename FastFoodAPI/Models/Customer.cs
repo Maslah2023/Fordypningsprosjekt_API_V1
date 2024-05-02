@@ -4,6 +4,6 @@ namespace FastFoodHouse_API.Models
 {
     public class Customer : IdentityUser
     {
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; }
     }
 }

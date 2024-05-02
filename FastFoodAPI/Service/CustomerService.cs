@@ -26,9 +26,10 @@ namespace FastFoodHouse_API.Service
 
         }
 
-        public void DeleteCustomer(string customerId)
+        public Task<Customer> DeleteCustomer(string customerId)
         {
             var customer = _customerRep.DeleteCustomer(customerId);
+            return customer;
         }
 
         public Task<IEnumerable<Customer>> GetAllCustomers()
@@ -43,37 +44,14 @@ namespace FastFoodHouse_API.Service
             return customer;
         }
 
-        public void  UpdateCustomer(string customerId,UpdateCustomerDTO updateCustomerDTO)
+        public async Task<Customer> UpdateCustomer(string customerId, UpdateCustomerDTO updateCustomerDTO, string currentPassword, string newPassword)
         {
             var customerToUpdate = _mapper.Map<Customer>(updateCustomerDTO);
-            _customerRep.UpdateCustomerById(customerId, customerToUpdate);
+            var customer =  await _customerRep.UpdateCustomerById(customerId, customerToUpdate, currentPassword, newPassword);
+            return customer;
            
             
         }
-        //public async Task AddUser()
-        //{
-        //    IEnumerable<Customer> listUsers = _mapper.Map<IEnumerable<Customer>>(await _authService.GetAllUsers());
-        //    foreach (var user in listUsers)
-        //    {
-        //        _db.Customer.Add(user);
-        //        await _db.SaveChangesAsync();
-        //    }
-
-        //}
-
-        //public async Task UpdateCustomer(string id, UpdateCustomerDTO updateCustomerDTO)
-        //{
-        //    var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
-        //    user.Name = updateCustomerDTO.Name;
-        //    IdentityResult x = await _userManager.UpdateAsync(user);
-        //    if (x != null)
-        //    {
-
-        //    }
-        //}
-
-
-
 
     }
 }

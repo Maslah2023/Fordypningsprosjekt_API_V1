@@ -17,19 +17,23 @@ namespace FastFoodHouse_API.Service
             _mapper = mapper;   
             
         }
-        public void AddMenu(MenuItem item)
+        public async Task<MenuDTO> AddMenu(CreateMenuDTO item)
         {
-            _menuRepo.AddMenu(item);
+            var menuItem = _mapper.Map<MenuItem>(item);
+            MenuDTO menuItemDTO = _mapper.Map<MenuDTO>( await _menuRepo.AddMenu(menuItem));
+            return menuItemDTO;
         }
 
-        public void DeleteMenu(int menuId)
+        public async Task<MenuDTO> DeleteMenu(int menuId)
         {
-            throw new NotImplementedException();
+           MenuDTO  menuItem =_mapper.Map<MenuDTO>(await _menuRepo.DeleteMenu(menuId));
+            return menuItem;
         }
 
-        public Task<MenuDTO> GetAllMenuesAsync()
+        public async Task<IEnumerable<MenuDTO>> GetAllMenuesAsync()
         {
-            throw new NotImplementedException();
+            IEnumerable<MenuDTO> menuDTO = _mapper.Map<IEnumerable<MenuDTO>>(await _menuRepo.GetAllMenues()); 
+            return menuDTO;
         }
 
         public async Task<MenuDTO> GetMenuByIdAsync(int menuId)
