@@ -36,51 +36,53 @@ namespace FastFoodHouse_API.Controller
 
         //[Authorize(Roles = SD.Role_Admin)]
         [HttpGet]
-        public async Task<ActionResult<ApiResponse>> GetAllUsers(string userId)
+        public async Task<ActionResult> GetCustomers()
         {
             try
             {
-                var users = await _customerService.GetAllCustomers();
-                if (users == null)
+                var customers = await _customerService.GetAllCustomers();
+                if (customers.Count() == 0)
                 {
                     return NotFound();
                 }
-                _apiResponse.Result = users;
-                _apiResponse.StatusCode = System.Net.HttpStatusCode.OK;
-                return Ok(_apiResponse);
+
+                return Ok(customers);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"An error occured while retrieving customers: {ex.Message}");
-                _apiResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
-                _apiResponse.Message = "Internal Server Error";
-                return _apiResponse;
-
+                _logger.LogError($"An error occurred while retrieving customers: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
-
-
-
         }
+
 
         //[Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(string id)
         {
 
-        
-            //// Retrieve the currently logged-in user's ID from claims
-            //var currentUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            //if (currentUser != id)
-            //{
-            //    return Unauthorized();
-            //}
-            var loginUser = await _customerService.GetCustomerById(id);
-            if (loginUser == null)
+            try
             {
-                return NotFound();
-            }
+                // Retrieve the currently logged-in user's ID from claims
+                var currentUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (currentUser != id)
+                {
+                    return Unauthorized();
+                }
 
-            return Ok(loginUser);
+                var customer = await _customerService.GetCustomerById(id);
+                if (customer == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(customer);
+            }
+            catch (Exception ex)
+            {
+                
+                return StatusCode(500, "Internal server error");
+            }
         }
 
 
@@ -90,32 +92,27 @@ namespace FastFoodHouse_API.Controller
         {
             try
             {
-                //string loggedInUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                //if(loggedInUser != id || loggedInUser == null) 
-                //{
-                //    _apiResponse.StatusCode = System.Net.HttpStatusCode.BadRequest;
-                //    _apiResponse.IsSuccess = false;
-                //    return BadRequest(_apiResponse);
-                //}
                 var customer = await _customerService.UpdateCustomer(id, updateCustomerDTO, currentPassword, newPassword);
-                _apiResponse.StatusCode = System.Net.HttpStatusCode.OK;
+                if (customer == null)
+                {
+                    _logger.LogWarning("Customer not found with ID: {CustomerId}", id);
+                    return NotFound();
+                }
+
                 return NoContent();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                _logger.LogError($"An error occured while retrieving customers: {ex.Message}");
-                _apiResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
-                _apiResponse.Message = "Internal Server Error";
-                return _apiResponse;
-
+                _logger.LogError(ex, $"An error occurred while updating customer with ID: {id}");
+                return StatusCode(500, "Internal Server Error");
             }
-           
+
         }
 
 
 
         [HttpDelete("{userId}")]
-        public async Task<IActionResult> DeleteCustomer(string userId)
+        public async Task<ActionResult<CustomerDTO>> DeleteCustomer(string userId)
         {
             try
             {
@@ -123,19 +120,21 @@ namespace FastFoodHouse_API.Controller
                 {
                     return BadRequest();
                 }
-                CustomerDTO deletedCustomer =  await _customerService.DeleteCustomer(userId);
-                return Ok(deletedCustomer);
 
+                var deletedCustomer = await _customerService.DeleteCustomer(userId);
+                if (deletedCustomer == null)
+                {
+                    _logger.LogWarning("Customer not found with ID: {UserId}", userId);
+                    return NotFound();
+                }
+
+                return Ok(deletedCustomer);
             }
             catch (Exception ex)
             {
-                _apiResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
-                _apiResponse.IsSuccess = false;
-                return BadRequest(_apiResponse);
-
+                _logger.LogError(ex, $"An error occurred while deleting customer with ID: {userId}");
+                return StatusCode(500, "Internal Server Error");
             }
-            
-         
 
         }
 

@@ -25,22 +25,27 @@ namespace FastFoodHouse_API.Repository
 
         public async Task<IEnumerable<Customer>> GetAllCustomers()
         {
+
             try
             {
-                var users = await
-               _db.Customers.ToListAsync();
-                if (users == null)
+                
+                var customers = await _db.Customers.ToListAsync();
+                if (customers.Count() == 0)
                 {
-                    return null;
+                    // Log a warning if users is null (unlikely if there's an error in fetching)
+                    _logger.LogWarning("No customers found in the database");
+                    return Enumerable.Empty<Customer>(); // Return an empty collection
                 }
-                return users;
+                return customers;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occured while retrieving customers: {ex.Message}");
-                return null;
-            }
+                // Log the error
+                _logger.LogError(ex, "An error occurred while retrieving customers");
 
+                // Handle the error locally (e.g., return a default value or an empty collection)
+                return Enumerable.Empty<Customer>(); // Return an empty collection
+            }
 
         }
 
@@ -48,8 +53,7 @@ namespace FastFoodHouse_API.Repository
         {
             try
             {
-                Customer? customer = await
-               _db.Customers.SingleOrDefaultAsync(x => x.Id == customerId);
+                Customer customer = await _db.Customers.SingleOrDefaultAsync(x => x.Id == customerId);
                 if (customer == null)
                 {
                     return null;
@@ -58,7 +62,7 @@ namespace FastFoodHouse_API.Repository
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occured while retrieving customer with  id : {ex.Message}");
+                _logger.LogError(ex, $"An error occurred while retrieving customer with ID: {customerId}");
                 return null;
             }
         }
@@ -72,8 +76,12 @@ namespace FastFoodHouse_API.Repository
                 if (customer != null)
                 {
                     customer.Name = user.Name;
-                    customer.UserName = user.UserName;
-                    customer.NormalizedUserName = user.UserName;
+                    customer.Email = user.UserName;
+                    customer.Email = user.Email;
+                    customer.NormalizedEmail = user.Email;
+                    customer.Address = user.Address;
+                    customer.PhoneNumber = user.PhoneNumber;
+                    customer.City = user.City;
        
                 }
                 IdentityResult result = await _userManager.UpdateAsync(customer);
@@ -112,19 +120,23 @@ namespace FastFoodHouse_API.Repository
         {
             try
             {
-            var customer = await _userManager.FindByIdAsync(customerId);
+                var customer = await _userManager.FindByIdAsync(customerId);
                 if (customer == null)
                 {
-                    return null;
+                    // Log a warning if customer is null (unlikely if there's an error in fetching)
+                    _logger.LogWarning("Customer not found with ID: {CustomerId}", customerId);
+                    return null; // or throw new NotFoundException("Customer not found") depending on your requirements
                 }
-               await  _userManager.DeleteAsync(customer);
-               await _db.SaveChangesAsync();
-               return customer;
+
+                await _userManager.DeleteAsync(customer);
+                await _db.SaveChangesAsync();
+
+                return customer;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occured while retrieving");
-                return null ;
+                _logger.LogError(ex, $"An error occurred while deleting customer with ID: {customerId}");
+                return null; // or throw new DeleteCustomerException("Failed to delete customer", ex) depending on your requirements
             }
 
         }

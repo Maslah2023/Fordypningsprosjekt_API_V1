@@ -55,9 +55,7 @@ builder.Services.AddTransient<GlobalExceptionMiddleware>();
 
 
 
-builder.Services.AddControllers()
-    .AddFluentValidation(c => 
-    c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()));
+builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 

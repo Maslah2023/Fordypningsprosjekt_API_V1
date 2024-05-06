@@ -33,36 +33,35 @@ namespace FastFoodHouse_API.Controller
 
        [HttpGet]
 
-       public async Task<ActionResult<ApiResponse>> GetAllMenuItems()
+       public async Task<ActionResult<MenuItemDTO>> GetAllMenuItems()
        {
             try
             {
-                var menuItems = await _menuService.GetAllMenuesAsync();
-                if(menuItems == null)
+                var menuItems = await _menuService.GetAllMenuesAsync(); 
+                if (menuItems == null)
                 {
+                    _logger.LogWarning("No menu items found.");
                     return NotFound();
                 }
-                _apiResponse.Result = menuItems;
-                return Ok(_apiResponse);
+
+                return Ok(menuItems);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Internal Server Error");
-                return BadRequest();
+                _logger.LogError(ex, $"An error occurred while retrieving menu items.");
+                return StatusCode(500, "Internal Server Error");
             }
-            
+
         }
 
 
 
         [HttpGet("{id}")]
-
         public async Task<ActionResult<MenuItem>> GetMenuItemById(int id)
         {
             try
             {
-                var menuItem = await
-                _menuService.GetMenuByIdAsync(id);
+                var menuItem = await _menuService.GetMenuByIdAsync(id);
                 if (menuItem == null)
                 {
                     return NotFound();
@@ -71,29 +70,27 @@ namespace FastFoodHouse_API.Controller
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Internal Server Error");
-                return BadRequest();
+                _logger.LogError(ex, $"An internal server error occurred.");
+                return StatusCode(500, "Internal Server Error");
             }
-            
         }
 
 
-    
+
+
         [HttpPost]
         public async Task<ActionResult<MenuItem>> CreateMenu(CreateMenuDTO createMenuDTO)
         {
-            
             try
             {
-                   var menuDTO = await _menuService.AddMenu(createMenuDTO);
-                    return Ok(menuDTO);
+                var menuDTO = await _menuService.AddMenu(createMenuDTO);
+                return Ok();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Internal Server Error");
-                return BadRequest();
+                _logger.LogError(ex, $"An error occurred while creating the menu.");
+                return StatusCode(500, "Internal Server Error");
             }
-           
         }
 
 
@@ -103,39 +100,43 @@ namespace FastFoodHouse_API.Controller
         {
             try
             {
-
                 if (ModelState.IsValid)
                 {
                     _menuService.UpdateMenu(id, menuUpdateDTO);
+                    return NoContent();
                 }
-                _apiResponse.StatusCode = HttpStatusCode.NoContent;
-                return _apiResponse;
+                else
+                {
+                    return BadRequest(ModelState);
+                }
             }
             catch (Exception ex)
             {
-                _apiResponse.StatusCode= HttpStatusCode.InternalServerError;
-                _apiResponse.IsSuccess=false;
-                _apiResponse.Message = "Internal Server Error";
+                _logger.LogError(ex, $"An error occurred while updating the menu with ID: {id}.");
+                return StatusCode(500, "Internal Server Error");
             }
-            return _apiResponse;
         }
 
 
         [HttpDelete("{id}")]
-        public  async Task<ActionResult<MenuItem>> DeleteMenu(int id)
+        public async Task<ActionResult<MenuItem>> DeleteMenu(int id)
         {
             try
             {
-               MenuItem menuDTO= await _menuService.DeleteMenu(id);
+                var menuDTO = await _menuService.DeleteMenu(id);
+                if (menuDTO == null)
+                {
+                    return NotFound();
+                }
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Internal Server Error");
-                return BadRequest();
+                _logger.LogError(ex, $"An error occurred while deleting the menu with ID: {id}.");
+                return StatusCode(500, "Internal Server Error");
             }
         }
-        
+
     }
 }
 

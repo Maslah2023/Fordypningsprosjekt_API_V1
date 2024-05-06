@@ -3,7 +3,11 @@ using FastFoodHouse_API.Models;
 using FastFoodHouse_API.Models.Dtos;
 using FastFoodHouse_API.Repository.Interface;
 using Microsoft.EntityFrameworkCore;
-using Stripe.Climate;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FastFoodHouse_API.Repository
 {
@@ -18,120 +22,130 @@ namespace FastFoodHouse_API.Repository
             _logger = logger;
         }
 
-
         public async Task<OrderHeader> CreateOrder(OrderHeader orderHeader, IEnumerable<OrderDetail> orderDetail)
         {
             try
             {
                 if (orderHeader == null)
                 {
-                    throw new ArgumentNullException();
+                    throw new ArgumentNullException(nameof(orderHeader));
                 }
+
                 _db.OrderHeaders.Add(orderHeader);
                 await _db.SaveChangesAsync();
 
-                //if (orderDetail == null)
-                //{
-                //    throw new ArgumentNullException();
-                //}
-                //foreach (OrderDetail detail in orderDetail)
-                //{
-                //    detail.OrderHeaderId = orderHeader.OrderheaderId;
-                //    _db.orderDetails.Add(detail);
-                //}
-                //await _db.SaveChangesAsync();
-
-
+                // Add order details if provided
+                if (orderDetail != null)
+                {
+                    foreach (OrderDetail detail in orderDetail)
+                    {
+                        detail.OrderHeaderId = orderHeader.OrderheaderId;
+                        _db.orderDetails.Add(detail);
+                    }
+                    await _db.SaveChangesAsync();
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occured while retrieving");
+                _logger.LogError(ex, "An error occurred while creating an order.");
+                // You may want to throw the exception here depending on your requirements
                 return null;
-
             }
 
             return orderHeader;
-
-
-
-
-
-
         }
 
         public void DeleteOrderById(int id, int menuId)
         {
             try
             {
-                OrderHeader? orderToDelete = _db.OrderHeaders.Include(u => u.OrderDetails)
-                .FirstOrDefault(u => u.OrderheaderId == id);
-                OrderDetail itemToRemove = _db.orderDetails.FirstOrDefault(u => u.MenuItemId == menuId);
+                OrderHeader orderToDelete = _db.OrderHeaders.Include(u => u.OrderDetails)
+                    .FirstOrDefault(u => u.OrderheaderId == id);
 
-                if (menuId == 0)
+                if (orderToDelete != null)
                 {
-                    _db.Remove(orderToDelete);
-                    _db.SaveChanges();
-                }
-                else if(itemToRemove.MenuItemId == menuId && orderToDelete.OrderDetails.Count() != 1) 
-                {
-                    _db.orderDetails.Remove(itemToRemove);
-                    _db.SaveChanges();
-                } 
-                else
-                {
-                    _db.OrderHeaders.Remove(orderToDelete);
-                    _db.SaveChanges();
+                    if (menuId == 0 || orderToDelete.OrderDetails.Any(d => d.MenuItemId == menuId))
+                    {
+                        _db.OrderHeaders.Remove(orderToDelete);
+                        _db.SaveChanges();
+                    }
+                    else
+                    {
+                        OrderDetail itemToRemove = orderToDelete.OrderDetails.FirstOrDefault(d => d.MenuItemId == menuId);
+                        if (itemToRemove != null)
+                        {
+                            _db.orderDetails.Remove(itemToRemove);
+                            _db.SaveChanges();
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
-
+                _logger.LogError(ex, "An error occurred while deleting an order.");
+                // You may want to throw the exception here depending on your requirements
             }
-          
-            
-           
-
-        
-           
         }
 
         public async Task<OrderHeader> GetOrderById(int id)
         {
-            OrderHeader? orderHeader =
-            await _db.OrderHeaders.Include(u => u.OrderDetails).FirstOrDefaultAsync(u => u.OrderheaderId == id);
-            if (orderHeader == null)
+            try
             {
+                OrderHeader orderHeader = await _db.OrderHeaders.Include(u => u.OrderDetails)
+                    .FirstOrDefaultAsync(u => u.OrderheaderId == id);
+                return orderHeader;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while retrieving the order with ID: {id}.");
                 return null;
             }
-            return orderHeader;
         }
 
         public async Task<IEnumerable<OrderHeader>> GetOrders(string userId)
         {
             try
             {
-                IEnumerable<OrderHeader> orders = await
-              _db.OrderHeaders.Include(u => u.OrderDetails).ToListAsync();
+                IEnumerable<OrderHeader> orders = await _db.OrderHeaders.Include(u => u.OrderDetails).ToListAsync();
                 return orders;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                throw;
+                _logger.LogError(ex, "An error occurred while retrieving orders.");
+                return null;
             }
         }
 
-        public async void SaveChangesAsync()
+        public async Task SaveChangesAsync()
         {
-            await _db.SaveChangesAsync();
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while saving changes.");
+                // You may want to throw the exception here depending on your requirements
+            }
         }
 
         public void UpdateOrderHeader(int id, OrderHeader order)
         {
-            OrderHeader? orderToUpdate = _db.OrderHeaders.AsNoTracking().SingleOrDefault(x => x.OrderheaderId == id);
-            order.OrderheaderId = id;
-            _db.OrderHeaders.Update(order);
-            _db.SaveChanges();
+            try
+            {
+                OrderHeader orderToUpdate = _db.OrderHeaders.AsNoTracking().SingleOrDefault(x => x.OrderheaderId == id);
+                if (orderToUpdate != null)
+                {
+                    order.OrderheaderId = id;
+                    _db.OrderHeaders.Update(order);
+                    _db.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while updating the order with ID: {id}.");
+                // You may want to throw the exception here depending on your requirements
+            }
         }
     }
 }

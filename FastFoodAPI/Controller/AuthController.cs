@@ -1,9 +1,8 @@
 ﻿using FastFoodHouse_API.Models.Dtos;
 using FastFoodHouse_API.Service.Interface;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using System.Text;
+using System;
+using System.Threading.Tasks;
 
 namespace FastFoodHouse_API.Controller
 {
@@ -12,55 +11,56 @@ namespace FastFoodHouse_API.Controller
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly ApiResponse _response;
         private readonly ICustomerService _customerService;
 
-        public AuthController( IAuthService authService, ICustomerService customerService)
+        public AuthController(IAuthService authService, ICustomerService customerService)
         {
             _authService = authService;
-            _response = new ApiResponse();
             _customerService = customerService;
         }
-
-
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequestDTO model)
         {
-            var erroMessage = await _authService.Register(model);
-            if (!string.IsNullOrEmpty(erroMessage))
+            try
             {
-                _response.Message = erroMessage;
-                return BadRequest(_response);
-            }
+                var errorMessage = await _authService.Register(model);
+                if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    return BadRequest(errorMessage);
+                }
 
-            else
-            {
-                _response.StatusCode = System.Net.HttpStatusCode.OK;
-                _response.Message = erroMessage;
-                _response.IsSuccess = true;    
+                return Ok("User registered successfully.");
             }
-            return Ok(_response);
+            catch (Exception ex)
+            {
+                // Log the exception if necessary
+                Console.WriteLine($"An error occurred while registering: {ex.Message}");
+                return StatusCode(500, "Internal Server Error");
+            }
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequestDTO model)
         {
-             var user = await _authService.Login(model);
-            if (user.Customer == null) 
+            try
             {
-                _response.StatusCode = System.Net.HttpStatusCode.Unauthorized;
-                _response.IsSuccess = false;
-                _response.Message = "Username or Password is incorrect";
+                var user = await _authService.Login(model);
+                if (user.Customer == null)
+                {
+                    return Unauthorized("Username or Password is incorrect");
+                }
+                else
+                {
+                    return Ok(user);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                _response.Result = user;
+                // Log the exception if necessary
+                Console.WriteLine($"An error occurred while logging in: {ex.Message}");
+                return StatusCode(500, "Internal Server Error");
             }
-    
-            return Ok(_response);
         }
-
-
     }
 }

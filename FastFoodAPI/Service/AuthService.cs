@@ -1,12 +1,14 @@
-﻿using AutoMapper;
-using FastFoodHouse_API.Data;
+﻿using FastFoodHouse_API.Data;
 using FastFoodHouse_API.Models;
 using FastFoodHouse_API.Models.Dtos;
 using FastFoodHouse_API.Service.Interface;
 using FastFoodAPI.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 
 namespace FastFoodHouse_API.Service
 {
@@ -17,109 +19,91 @@ namespace FastFoodHouse_API.Service
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IMapper _mapper;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
-    
 
-        public AuthService(ApplicationDbContext applicationDbContext, 
-                           UserManager<Customer> userManager, 
-                           RoleManager<IdentityRole> roleManager, 
-                           IMapper mapper, IJwtTokenGenerator jwtTokenGenerator
-                         )
+        public AuthService(ApplicationDbContext applicationDbContext,
+                           UserManager<Customer> userManager,
+                           RoleManager<IdentityRole> roleManager,
+                           IMapper mapper, IJwtTokenGenerator jwtTokenGenerator)
         {
             _db = applicationDbContext;
             _userManager = userManager;
             _roleManager = roleManager;
             _mapper = mapper;
             _jwtTokenGenerator = jwtTokenGenerator;
-  
         }
-
 
         public async Task<LoginResponseDTO> Login(LoginRequestDTO model)
         {
-            var customer = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-
-            var isValid = await _userManager.CheckPasswordAsync(customer, model.Password);
-            if(isValid == false)
+            try
             {
-                return new() { Customer = null, Token = "" };
+                var customer = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+
+                if (customer == null)
+                {
+                    return new LoginResponseDTO { Customer = null, Token = "" };
+                }
+
+                var isValid = await _userManager.CheckPasswordAsync(customer, model.Password);
+                if (!isValid)
+                {
+                    return new LoginResponseDTO { Customer = null, Token = "" };
+                }
+
+                var roles = await _userManager.GetRolesAsync(customer);
+                var token = _jwtTokenGenerator.GenerateToken(customer, roles);
+
+                CustomerDTO customerDTO = _mapper.Map<CustomerDTO>(customer);
+
+                return new LoginResponseDTO { Customer = customerDTO, Token = token };
             }
-
-            // If user is found, generate a token
-            var roles = await _userManager.GetRolesAsync(customer);
-            var token = _jwtTokenGenerator.GenerateToken(customer, roles);
-
-            CustomerDTO customerDTO = new CustomerDTO()
+            catch (Exception ex)
             {
-                Id = customer.Id,
-                Name = customer.Name,
-                PhoneNumber = customer.PhoneNumber,
-                Email = customer.Email,
-                Address = customer.Address,
-                City = customer.City,
-            };
-
-            LoginResponseDTO loginResponsetDTO = new LoginResponseDTO
-            {
-
-                Customer = customerDTO,
-                Token = token,
-            };
-
-            return loginResponsetDTO;
+                // Log the exception if necessary
+                Console.WriteLine($"An error occurred while logging in: {ex.Message}");
+                throw;
+            }
         }
 
         public async Task<string> Register(RegisterRequestDTO model)
         {
-            var user = _db.Users.FirstOrDefault(u =>  u.Email == model.Email );
-
-            if (user != null)
+            try
             {
-                return $"User Already exits";
-            }
+                var user = await _userManager.FindByEmailAsync(model.Email);
 
-            Customer newUser = new Customer()
-            {
-                UserName = model.Email,
-                Email = model.Email,
-                NormalizedEmail = model.Email.ToUpper(),
-                Name = model.Name,
-                PhoneNumber = model.PhoneNumber,
-                Address = model.Address,
-                City = model.City,
-            };
-
-            var result = await _userManager.CreateAsync(newUser, model.Password);
-
-            if (result.Succeeded)
-            {
-                if (!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
+                if (user != null)
                 {
-                    // Creates role in database 
-                    await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
-                    if (model.Role.ToLower() == SD.Role_Admin.ToLower())
-                    {
+                    return "User already exists";
+                }
 
-                        await _userManager.AddToRoleAsync(newUser, SD.Role_Admin);
+                var newUser = _mapper.Map<Customer>(model);
+                newUser.UserName = model.Email;
+
+                var result = await _userManager.CreateAsync(newUser, model.Password);
+
+                if (result.Succeeded)
+                {
+                    var roleExists = await _roleManager.RoleExistsAsync(model.Role);
+                    if (!roleExists)
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(model.Role));
                     }
-       
+
+                    await _userManager.AddToRoleAsync(newUser, model.Role);
+
+                    return ""; // Success
                 }
                 else
                 {
-                    await _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer));
-                    if(model.Role.ToLower() == SD.Role_Customer.ToLower())
-                    {
-                        await _userManager.AddToRoleAsync(newUser, SD.Role_Customer);
-                    }
+                    return result.Errors.FirstOrDefault()?.Description ?? "An error occurred during registration";
                 }
             }
-            else
+            catch (Exception ex)
             {
-                return result.Errors.FirstOrDefault().Description;
+                // Log the exception if necessary
+                Console.WriteLine($"An error occurred while registering: {ex.Message}");
+                throw;
             }
-            return "";
-
-
-
         }
     }
 }
+
