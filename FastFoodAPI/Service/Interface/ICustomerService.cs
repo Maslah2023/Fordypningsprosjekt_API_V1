@@ -6,10 +6,10 @@ namespace FastFoodHouse_API.Service.Interface
 {
     public interface ICustomerService
     {
-        public Task<IEnumerable<Customer>> GetAllCustomers();
-        public Task<Customer> GetCustomerById(string customerId);
-        public Task<Customer> DeleteCustomer(string customrId);
-        public Task<Customer> UpdateCustomer(string customerId, UpdateCustomerDTO user, string currentPassword, string newPassword);
+        public Task<IEnumerable<CustomerDTO>> GetAllCustomers();
+        public Task<CustomerDTO> GetCustomerById(string customerId);
+        public Task<CustomerDTO> DeleteCustomer(string customrId);
+        public Task<CustomerDTO> UpdateCustomer(string customerId, UpdateCustomerDTO user, string currentPassword, string newPassword);
 
 
     }

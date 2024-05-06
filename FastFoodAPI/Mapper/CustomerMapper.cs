@@ -10,6 +10,7 @@ namespace FastFoodHouse_API.Mapper
         {
             CreateMap<Customer, UserDto>().ReverseMap();
             CreateMap<Customer, UpdateCustomerDTO>().ReverseMap();
+            CreateMap<Customer, CustomerDTO>().ReverseMap();
         }
     }
 }

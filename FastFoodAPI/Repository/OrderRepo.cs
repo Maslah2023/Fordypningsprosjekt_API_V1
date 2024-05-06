@@ -110,7 +110,8 @@ namespace FastFoodHouse_API.Repository
         {
             try
             {
-                IEnumerable<OrderHeader> orders = await _db.OrderHeaders.ToListAsync();
+                IEnumerable<OrderHeader> orders = await
+              _db.OrderHeaders.Include(u => u.OrderDetails).ToListAsync();
                 return orders;
             }
             catch (Exception ex)

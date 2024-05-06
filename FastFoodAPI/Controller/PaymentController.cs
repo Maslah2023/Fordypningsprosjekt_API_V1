@@ -26,7 +26,7 @@ namespace FastFoodHouse_API.Controller
         [HttpPost]
         public async Task<ActionResult<ApiResponse>> MakePayment(string userId)
         {
-            ShoppingCart? shoppingCart = await
+            ShoppingCart shoppingCart = await
            _db.ShoppingCarts.Include(u => u.CartItems)
            .ThenInclude(u => u.MenuItem).FirstOrDefaultAsync(u => u.UserId == userId);
 
@@ -47,7 +47,7 @@ namespace FastFoodHouse_API.Controller
                 Currency = "nok",
                 PaymentMethodTypes = new List<string>
                 {
-                    "Card"
+                    "card"
                 }
                 
             };

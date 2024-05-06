@@ -123,7 +123,7 @@ namespace FastFoodHouse_API.Controller
                 {
                     return BadRequest();
                 }
-                Customer deletedCustomer =  await _customerService.DeleteCustomer(userId);
+                CustomerDTO deletedCustomer =  await _customerService.DeleteCustomer(userId);
                 return Ok(deletedCustomer);
 
             }

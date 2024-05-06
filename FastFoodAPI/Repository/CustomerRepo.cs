@@ -118,7 +118,8 @@ namespace FastFoodHouse_API.Repository
                     return null;
                 }
                await  _userManager.DeleteAsync(customer);
-                return customer;
+               await _db.SaveChangesAsync();
+               return customer;
             }
             catch (Exception ex)
             {

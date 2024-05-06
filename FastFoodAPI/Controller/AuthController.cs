@@ -33,6 +33,7 @@ namespace FastFoodHouse_API.Controller
                 _response.Message = erroMessage;
                 return BadRequest(_response);
             }
+
             else
             {
                 _response.StatusCode = System.Net.HttpStatusCode.OK;
@@ -46,7 +47,7 @@ namespace FastFoodHouse_API.Controller
         public async Task<IActionResult> Login(LoginRequestDTO model)
         {
              var user = await _authService.Login(model);
-            if (user.User == null) 
+            if (user.Customer == null) 
             {
                 _response.StatusCode = System.Net.HttpStatusCode.Unauthorized;
                 _response.IsSuccess = false;

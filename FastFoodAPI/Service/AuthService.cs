@@ -33,64 +33,35 @@ namespace FastFoodHouse_API.Service
   
         }
 
-        public async Task<string> DeleteUser(string userId)
-        {
-            var userToDelete = await  _userManager.FindByIdAsync(userId);
-            if (userToDelete == null)
-            {
-                return "Not Found";
-            }
-            else
-            {
-                await _userManager.DeleteAsync(userToDelete);
-            }
-            return "";
-        }
-        public async Task<IEnumerable<UserDto>> GetAllUsers()
-        {
-            var users = await _db.Customers.ToListAsync();
-            if (users == null)
-            {
-                throw new ArgumentNullException(nameof(users));
-            }
-            IEnumerable<UserDto> userDto = _mapper.Map<IEnumerable<UserDto>>(users);
-            return userDto;
-        }
-
-        public async Task<UserDto> GetCustomerById(string id)
-        {
-            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
-            UserDto userDto = _mapper.Map<UserDto>(user);
-            return userDto;
-
-        }
 
         public async Task<LoginResponseDTO> Login(LoginRequestDTO model)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == model.UserName);
+            var customer = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
 
-            var isValid = await _userManager.CheckPasswordAsync(user, model.Password);
+            var isValid = await _userManager.CheckPasswordAsync(customer, model.Password);
             if(isValid == false)
             {
-                return new() { User = null, Token = "" };
+                return new() { Customer = null, Token = "" };
             }
 
             // If user is found, generate a token
-            var roles = await _userManager.GetRolesAsync(user);
-            var token = _jwtTokenGenerator.GenerateToken(user, roles);
+            var roles = await _userManager.GetRolesAsync(customer);
+            var token = _jwtTokenGenerator.GenerateToken(customer, roles);
 
-            UserDto userDto = new UserDto()
+            CustomerDTO customerDTO = new CustomerDTO()
             {
-                Id = user.Id,
-                Name = user.Name,
-                PhoneNumber = user.PhoneNumber,
-                Email = user.Email
+                Id = customer.Id,
+                Name = customer.Name,
+                PhoneNumber = customer.PhoneNumber,
+                Email = customer.Email,
+                Address = customer.Address,
+                City = customer.City,
             };
 
             LoginResponseDTO loginResponsetDTO = new LoginResponseDTO
             {
 
-                User = userDto,
+                Customer = customerDTO,
                 Token = token,
             };
 
@@ -99,7 +70,7 @@ namespace FastFoodHouse_API.Service
 
         public async Task<string> Register(RegisterRequestDTO model)
         {
-            var user = _db.Users.FirstOrDefault(u => u.UserName.ToLower()  == model.UserName.ToLower() || u.Email == model.UserName );
+            var user = _db.Users.FirstOrDefault(u =>  u.Email == model.Email );
 
             if (user != null)
             {
@@ -108,10 +79,13 @@ namespace FastFoodHouse_API.Service
 
             Customer newUser = new Customer()
             {
-                UserName = model.UserName,
-                NormalizedEmail = model.UserName.ToUpper(),
+                UserName = model.Email,
+                Email = model.Email,
+                NormalizedEmail = model.Email.ToUpper(),
                 Name = model.Name,
-
+                PhoneNumber = model.PhoneNumber,
+                Address = model.Address,
+                City = model.City,
             };
 
             var result = await _userManager.CreateAsync(newUser, model.Password);

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FastFoodHouse_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240416071201_initial")]
+    [Migration("20240506093958_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -59,6 +59,12 @@ namespace FastFoodHouse_API.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Address")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("City")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("longtext");
@@ -77,7 +83,6 @@ namespace FastFoodHouse_API.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("NormalizedEmail")
@@ -128,11 +133,9 @@ namespace FastFoodHouse_API.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Category")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Image")
@@ -147,7 +150,6 @@ namespace FastFoodHouse_API.Migrations
                         .HasColumnType("double");
 
                     b.Property<string>("SpecialTag")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
@@ -321,11 +323,9 @@ namespace FastFoodHouse_API.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Status")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("StripePaymentIntentID")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("StripePaymentIntentName")
@@ -343,17 +343,16 @@ namespace FastFoodHouse_API.Migrations
 
             modelBuilder.Entity("FastFoodHouse_API.Models.ShoppingCart", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
                     b.ToTable("ShoppingCarts");
                 });

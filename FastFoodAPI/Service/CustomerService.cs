@@ -26,29 +26,36 @@ namespace FastFoodHouse_API.Service
 
         }
 
-        public Task<Customer> DeleteCustomer(string customerId)
+        public async Task<CustomerDTO> DeleteCustomer(string customerId)
         {
-            var customer = _customerRep.DeleteCustomer(customerId);
+           CustomerDTO customerDTO =
+           _mapper.Map<CustomerDTO>
+           (await _customerRep
+           .DeleteCustomer(customerId));
+           return customerDTO;
+        }
+
+        public async Task<IEnumerable<CustomerDTO>> GetAllCustomers()
+        {
+            var customer = await _customerRep.GetAllCustomers();
+            IEnumerable<CustomerDTO> user = _mapper.Map<IEnumerable<CustomerDTO>>(customer);
+            return user;
+        }
+
+        public async Task<CustomerDTO> GetCustomerById(string customerId)
+        {
+            CustomerDTO customer =
+            _mapper.Map<CustomerDTO>
+           (await _customerRep.GetCustomerById(customerId));
             return customer;
         }
 
-        public Task<IEnumerable<Customer>> GetAllCustomers()
-        {
-            var customer = _customerRep.GetAllCustomers();
-            return customer;
-        }
-
-        public Task<Customer> GetCustomerById(string customerId)
-        {
-            var customer = _customerRep.GetCustomerById(customerId);
-            return customer;
-        }
-
-        public async Task<Customer> UpdateCustomer(string customerId, UpdateCustomerDTO updateCustomerDTO, string currentPassword, string newPassword)
+        public async Task<CustomerDTO> UpdateCustomer(string customerId, UpdateCustomerDTO updateCustomerDTO, string currentPassword, string newPassword)
         {
             var customerToUpdate = _mapper.Map<Customer>(updateCustomerDTO);
             var customer =  await _customerRep.UpdateCustomerById(customerId, customerToUpdate, currentPassword, newPassword);
-            return customer;
+            CustomerDTO customerDTO = _mapper.Map<CustomerDTO>(customer);
+            return customerDTO;
            
             
         }
