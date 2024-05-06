@@ -14,22 +14,26 @@ namespace FastFoodHouse_API.Repository
             _db = db;
         }
 
-        public void CreateShoppingCart(ShoppingCart shoppingCart)
+        public async Task<ShoppingCart> CreateShoppingCart(ShoppingCart shoppingCart)
         {
             _db.ShoppingCarts.Add(shoppingCart);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
+            return shoppingCart;
         }
 
-        public async Task<ShoppingCart> GetShoopingCart(string userId)
+        public async Task<ShoppingCart> GetShoppingCart(string userId)
         {
             ShoppingCart? shoppingCarts = await
-           _db.ShoppingCarts.Include(u => u.CartItems).ThenInclude(u => u.MenuItem).FirstOrDefaultAsync(u => u.UserId == userId);
+           _db.ShoppingCarts.Include(u => u.CartItems).ThenInclude(u => u.MenuItem).AsNoTracking().FirstOrDefaultAsync(u => u.UserId == userId);
             return shoppingCarts;
          }
 
         public async Task<ShoppingCart> GetShoppingCartById(string userId)
         {
-            return await _db.ShoppingCarts.Include(u => u.CartItems).ThenInclude(u => u.MenuItem).FirstOrDefaultAsync(u => u.UserId == userId);
+            return await _db.ShoppingCarts
+           .Include(u => u.CartItems)
+           .ThenInclude(u => u.MenuItem)
+           .AsNoTracking().FirstOrDefaultAsync(u => u.UserId == userId);
         }
 
         public void RemoveCart(ShoppingCart shoppingCart)
@@ -40,7 +44,13 @@ namespace FastFoodHouse_API.Repository
 
         public void SaveChangesAsync()
         {
-            _db?.SaveChangesAsync();
+            _db.SaveChangesAsync();
+        }
+
+        public void UpdateShoppingCart(ShoppingCart shoppingCart)
+        {
+            _db.ShoppingCarts.Update(shoppingCart);
+            _db.SaveChanges();
         }
     }
 }

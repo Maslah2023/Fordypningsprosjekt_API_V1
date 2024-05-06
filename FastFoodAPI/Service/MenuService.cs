@@ -17,34 +17,35 @@ namespace FastFoodHouse_API.Service
             _mapper = mapper;   
             
         }
-        public async Task<MenuDTO> AddMenu(CreateMenuDTO item)
+        public async Task<MenuItem> AddMenu(CreateMenuDTO item)
         {
             var menuItem = _mapper.Map<MenuItem>(item);
-            MenuDTO menuItemDTO = _mapper.Map<MenuDTO>( await _menuRepo.AddMenu(menuItem));
+            MenuItem menuItemDTO = _mapper.Map<MenuItem>( await _menuRepo.AddMenu(menuItem));
             return menuItemDTO;
         }
 
-        public async Task<MenuDTO> DeleteMenu(int menuId)
+        public async Task<MenuItem> DeleteMenu(int menuId)
         {
-           MenuDTO  menuItem =_mapper.Map<MenuDTO>(await _menuRepo.DeleteMenu(menuId));
+           MenuItem  menuItem =_mapper.Map<MenuItem>(await _menuRepo.DeleteMenu(menuId));
             return menuItem;
         }
 
-        public async Task<IEnumerable<MenuDTO>> GetAllMenuesAsync()
+        public async Task<IEnumerable<MenuItem>> GetAllMenuesAsync()
         {
-            IEnumerable<MenuDTO> menuDTO = _mapper.Map<IEnumerable<MenuDTO>>(await _menuRepo.GetAllMenues()); 
+            IEnumerable<MenuItem> menuDTO = _mapper.Map<IEnumerable<MenuItem>>(await _menuRepo.GetAllMenues()); 
             return menuDTO;
         }
 
-        public async Task<MenuDTO> GetMenuByIdAsync(int menuId)
+        public async Task<MenuItemDTO> GetMenuByIdAsync(int menuId)
         {
-            MenuDTO menuDTO = _mapper.Map<MenuDTO>(await _menuRepo.GetMenuById(menuId)); 
+            MenuItemDTO menuDTO = _mapper.Map<MenuItemDTO>(await _menuRepo.GetMenuById(menuId)); 
             return menuDTO;
         }
 
-        public void UpdateMenu(int menuId)
+        public void UpdateMenu(int menuId, MenuUpdateDTO menuUpdateDTO)
         {
-            throw new NotImplementedException();
+            MenuItem menuItem = _mapper.Map<MenuItem>(menuUpdateDTO);
+            _menuRepo.UpdateMenu(menuId, menuItem);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace FastFoodHouse_API.Repository.Interface
         Task<IEnumerable<MenuItem>> GetAllMenues();
         Task<MenuItem> GetMenuById(int menuName);
         Task<MenuItem> AddMenu(MenuItem item);
-        void UpdateMenu(int menuId);
+        void UpdateMenu(int menuId, MenuItem menuItem);
         Task<MenuItem> DeleteMenu(int menuId);
         
 

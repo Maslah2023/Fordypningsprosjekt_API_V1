@@ -17,10 +17,13 @@ namespace FastFoodHouse_API.Service
             _mapper = mapper;
         }
 
-        public void CreateShoppingCart(ShoppingCartCreateDTO shoppingCartCreateDTO)
+        public async Task<ShoppingCartDTO> CreateShoppingCart(ShoppingCartCreateDTO shoppingCartCreateDTO)
         {
-            ShoppingCart shoppingCart = _mapper.Map<ShoppingCart>(shoppingCartCreateDTO); 
-            _shoppingCartRepo.CreateShoppingCart(shoppingCart);
+            ShoppingCart shoppingCart = _mapper.Map<ShoppingCart>(shoppingCartCreateDTO);
+            ShoppingCartDTO shoppingCartDto = 
+           _mapper.Map<ShoppingCartDTO>
+           ( await _shoppingCartRepo.CreateShoppingCart(shoppingCart));
+            return shoppingCartDto;
         }
 
         public async Task<ShoppingCartDTO> GetShoppingById(string id)
@@ -33,7 +36,7 @@ namespace FastFoodHouse_API.Service
 
         public async Task<ShoppingCartDTO> GetShoppingCart(string userId)
         {
-          var shoppingCarts = await _shoppingCartRepo.GetShoopingCart(userId);
+          var shoppingCarts = await _shoppingCartRepo.GetShoppingCart(userId);
           ShoppingCartDTO shoppingCartDTO = _mapper.Map<ShoppingCartDTO>(shoppingCarts);
           return shoppingCartDTO;
         }
@@ -48,6 +51,12 @@ namespace FastFoodHouse_API.Service
         public  void SaveChangesAsync()
         {
             _shoppingCartRepo.SaveChangesAsync();
+        }
+
+        public void UpdateShoppingCart(ShoppingCartDTO shoppingCartDTO)
+        {
+            ShoppingCart shoppingCart = _mapper.Map<ShoppingCart>(shoppingCartDTO);
+           _shoppingCartRepo.UpdateShoppingCart(shoppingCart);
         }
     }
 }

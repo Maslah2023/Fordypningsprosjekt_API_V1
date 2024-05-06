@@ -2,7 +2,7 @@
 
 namespace FastFoodHouse_API.Models.Dtos
 {
-    public class MenuDTO
+    public class MenuItemDTO
     {
         
         public int Id { get; set; }

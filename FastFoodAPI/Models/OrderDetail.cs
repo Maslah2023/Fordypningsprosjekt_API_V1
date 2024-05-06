@@ -14,12 +14,13 @@ namespace FastFoodHouse_API.Models
         [Required]
         public int MenuItemId { get; set; }
         [ForeignKey("MenuItemId")]
-        public MenuItem? MenuItem { get; set; }
+        public MenuItem MenuItem { get; set; }
         [Required]
         public int Quantity { get; set; }
         [Required]
-        public string? ItemName { get; set; }
-        
-        
+        public string ItemName { get; set; }
+        public double Price { get; set; }
+
+
     };
 }

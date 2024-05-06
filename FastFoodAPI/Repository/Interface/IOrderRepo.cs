@@ -9,7 +9,6 @@ namespace FastFoodHouse_API.Repository.Interface
         Task<OrderHeader> GetOrderById(int id);
         Task<OrderHeader> CreateOrder(OrderHeader order, IEnumerable<OrderDetail> orderDetail);
         void UpdateOrderHeader(int id, OrderHeader order);
-
-        void SaveChangesAsync();
+        void DeleteOrderById(int id, int menuId);   
     }
 }

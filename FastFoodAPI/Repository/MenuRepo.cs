@@ -59,13 +59,23 @@ namespace FastFoodHouse_API.Repository
 
         public async Task<MenuItem> GetMenuById(int menuId)
         {
-            MenuItem? menu = await _db.Menu.FindAsync(menuId);
+            MenuItem? menu = await _db.Menu.AsNoTracking().FirstOrDefaultAsync(u => u.Id == menuId);
             return menu;
         }
 
-        public void UpdateMenu(int menuId)
+        public void UpdateMenu(int menuId, MenuItem  menuItem)
         {
-            throw new NotImplementedException();
+            var menuToUpdate = _db.Menu.Find(menuId);
+
+            menuToUpdate.Id = menuId;
+            menuToUpdate.Name = menuItem.Name;
+            menuToUpdate.Description = menuItem.Description;
+            menuToUpdate.Category = menuItem.Category;
+            menuToUpdate.Price = menuItem.Price;
+            menuToUpdate.SpecialTag = menuItem.SpecialTag;
+
+            _db.Menu.Update(menuToUpdate);
+            _db.SaveChanges();  
         }
     }
 }

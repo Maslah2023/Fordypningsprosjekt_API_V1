@@ -20,6 +20,6 @@ namespace FastFoodHouse_API.Models.Dtos
         public string Status { get; set; }
         public int TotalItems { get; set; }
 
-        public IEnumerable<OrderDetailsDTO> OrderDetailsDTO { get; set; }
+        public List<OrderDetailsDTO> OrderDetails { get; set; }
     }
 }

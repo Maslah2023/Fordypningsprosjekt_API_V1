@@ -1,4 +1,5 @@
-﻿using FastFoodHouse_API.Data;
+﻿using AutoMapper;
+using FastFoodHouse_API.Data;
 using FastFoodHouse_API.Models;
 using FastFoodHouse_API.Models.Dtos;
 using FastFoodHouse_API.Service;
@@ -16,22 +17,27 @@ namespace FastFoodHouse_API.Controller
     [ApiController]
     public class ShoppingCartController : ControllerBase
     {
-
+        private readonly ApplicationDbContext _dbContext;
         private readonly IShoppingCartService _shoppingCartService;
         private readonly ApiResponse _response;
         private readonly IMenuService _menuService;
         private readonly ICartItemService _cartItemService;
-        public ShoppingCartController(IShoppingCartService shoppingCartService, IMenuService menuService, ICartItemService cartItemService)
+        private readonly ApplicationDbContext _db;
+        private readonly IMapper _mapper;
+        public ShoppingCartController(IShoppingCartService shoppingCartService, IMenuService menuService, ICartItemService cartItemService, ApplicationDbContext db, ApplicationDbContext dbContext, IMapper mapper)
         {
             _shoppingCartService = shoppingCartService;
             _menuService = menuService;
             _response = new ApiResponse();
             _cartItemService = cartItemService;
+            _db = db;
+            _dbContext = dbContext;
+            _mapper = mapper;
         }
   
 
 
-        [Authorize]
+        //[Authorize]
         [HttpGet]
         public async Task<ActionResult<ShoppingCartDTO>> GetShoppingCart(string userId)
         {
@@ -70,21 +76,17 @@ namespace FastFoodHouse_API.Controller
 
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPost]
-        public async Task<ActionResult<ShoppingCartDTO>> AddOrUpdateCart(string userId, int menuItemId, int updateQuatityBy)
+        public async Task<ActionResult<ShoppingCartDTO>> AddOrUpdateCart(string userId, int menuItemId, int updateQuantityBy)
         {
             try
             {
-                //ShoppingCart? shoppingCart = await
-                //_db.ShoppingCarts
-                //.Include(u => u.CartItems)
-                //.FirstOrDefaultAsync(u => u.UserId == userId);
+               
                ShoppingCartDTO shoppingCartDTO = await _shoppingCartService.GetShoppingCart(userId);
           
-          
-
-                MenuDTO? menuItem = await
+        
+                MenuItemDTO menuItem = await
                _menuService.GetMenuByIdAsync(menuItemId);
 
                 if (menuItem == null)
@@ -94,7 +96,7 @@ namespace FastFoodHouse_API.Controller
                     return NotFound(_response);
                 }
 
-                if (shoppingCartDTO == null && updateQuatityBy > 0)
+                if (shoppingCartDTO == null && updateQuantityBy > 0)
                 {
                     ShoppingCartCreateDTO newCart = new ShoppingCartCreateDTO() { UserId = userId };
                     _shoppingCartService.CreateShoppingCart(newCart);
@@ -102,7 +104,7 @@ namespace FastFoodHouse_API.Controller
                     CartItemCreateDTO newItem = new CartItemCreateDTO()
                     {
                         MenuItemId = menuItemId,
-                        Quantity = updateQuatityBy,
+                        Quantity = updateQuantityBy,
                         ShoppingCartId = newCart.Id,
                     };
                     _cartItemService.AddItemToCart(newItem);
@@ -110,40 +112,47 @@ namespace FastFoodHouse_API.Controller
                 }
                 else
                 {
-                    // Shopping cart exist
-                    CartItemDTO? itemInCart = shoppingCartDTO.CartItemDTO.SingleOrDefault(u => u.MenuItemId == menuItemId)!;
+                    var itemInCart = shoppingCartDTO.CartItems.FirstOrDefault(u => u.MenuItemId == menuItemId);
+
                     // Item does not exits in current cart
                     if (itemInCart == null)
                     {
                         CartItemCreateDTO newItem = new CartItemCreateDTO()
                         {
                             MenuItemId = menuItemId,
-                            Quantity = updateQuatityBy,
+                            Quantity = updateQuantityBy,
                             ShoppingCartId = shoppingCartDTO.Id,
                         };
                         _cartItemService.AddItemToCart(newItem);
                     }
                     else
                     {
+
+
                         // item exist in current cart
-                        int newQuantity = itemInCart.Quantity + updateQuatityBy;
-                        if (updateQuatityBy == 0 || newQuantity <= 0)
+
+
+                        int newQuantity = itemInCart.Quantity + updateQuantityBy;
+
+                        if (updateQuantityBy == 0 || newQuantity <= 0)
                         {
                             // remove item from the cart and if it is the only item then remove the shoppingcart
-                            _cartItemService.RemoveItemInCart(itemInCart);
-                            //_db.CartItems.Remove(itemInCart);
-                            if (shoppingCartDTO.CartItemDTO.Count() == 0)
-                            {
-                                //_db.ShoppingCarts.Remove(shoppingCart);
-                                _shoppingCartService.RemoveCart(shoppingCartDTO);
-                            }
+                            
+                                //remove cart item from cart and if it is the only item then remove cart
+                                _cartItemService.RemoveItemInCart(itemInCart);
+                                if (shoppingCartDTO.CartItems.Count() == 1)
+                                {
+                                   _shoppingCartService.RemoveCart(shoppingCartDTO);
+                                }
+
                         }
                         else
                         {
                             itemInCart.Quantity = newQuantity;
+                           _cartItemService.UpdateItemInCart(itemInCart);
                         }
-                        //await _db.SaveChangesAsync();
-                        _shoppingCartService.SaveChangesAsync();
+                      
+                    
                     }
 
                 }
@@ -161,60 +170,6 @@ namespace FastFoodHouse_API.Controller
             return BadRequest(_response);
 
         }
-
-
-        //[HttpPost]
-
-        //public async Task<IActionResult> AddShoppingCart(string userId, int menuItemId,  int updateQuantityBy)
-        //{
-        //    ShoppingCartCreateDTO createShoopingCartDTO;
-        //    IEnumerable<ShoppingCartDTO> shoppingCartDTO = await _shoppingCartService.GetShoppingCart(userId);
-
-        //    MenuDTO  menuItem = await _menuService.GetMenuByIdAsync(menuItemId);
-
-        //    if (menuItem == null)
-        //    {
-        //        _response.StatusCode=HttpStatusCode.NotFound;
-        //        _response.IsSuccess = false;
-        //        return NotFound(_response);
-        //    }
-
-        //    if (shoppingCartDTO == null && updateQuantityBy > 0)
-        //    {
-        //        ShoppingCartCreateDTO addOrUpdateShoppingCart = new() { UserId = userId };
-
-        //        createShoopingCartDTO = await _shoppingCartService.AddOrUpdateShoppingCart(addOrUpdateShoppingCart);
-
-        //        CartItemCreateDTO cartDTO = new CartItemCreateDTO()
-        //        {
-        //            MenuItemId = menuItemId,
-        //            Quantity = updateQuantityBy,
-        //            ShoppingCartId = createShoopingCartDTO.Id
-        //        };
-
-
-        //        _cartItemService.AddItemToCart(cartDTO);
-
-        //    }
-        //    else
-        //    {
-
-        //        CartItemDTO cartItemDTO = await _cartItemService.GetCartItemById(menuItemId);
-        //        IEnumerable<ShoppingCartDTO> getshoppingCartDTO = await _shoppingCartService.GetShoppingCart(createShoopingCartDTO.UserId);
-        //        if(cartItemDTO == null)
-        //        {
-        //            cartItemDTO = new CartItemDTO()
-        //            {
-        //                MenuItemId = menuItemId,
-        //                Quantity = updateQuantityBy,
-        //                ShoppingCartId = createShoopingCartDTO.Id,
-
-        //            };
-        //        }
-        //    }
-        //    return Created();
-
-        //}
 
 
 

@@ -8,6 +8,6 @@ namespace FastFoodHouse_API.Service.Interface
         Task<CartItemDTO> GetCartItemById(int id);
         void AddItemToCart(CartItemCreateDTO cartItemCreateDTO);
         void RemoveItemInCart(CartItemDTO cartItemDto);
-        void UpdateItenInCart(CartItemDTO cartItemDTO);
+        void UpdateItemInCart(CartItemDTO cartItemDTO);
     }
 }

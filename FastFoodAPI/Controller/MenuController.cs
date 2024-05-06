@@ -57,7 +57,7 @@ namespace FastFoodHouse_API.Controller
 
         [HttpGet("{id}")]
 
-        public async Task<ActionResult<MenuDTO>> GetMenuItemById(int id)
+        public async Task<ActionResult<MenuItem>> GetMenuItemById(int id)
         {
             try
             {
@@ -80,7 +80,7 @@ namespace FastFoodHouse_API.Controller
 
     
         [HttpPost]
-        public async Task<ActionResult<MenuDTO>> CreateMenu(CreateMenuDTO createMenuDTO)
+        public async Task<ActionResult<MenuItem>> CreateMenu(CreateMenuDTO createMenuDTO)
         {
             
             try
@@ -97,38 +97,17 @@ namespace FastFoodHouse_API.Controller
         }
 
 
-        [Authorize(Roles = SD.Role_Admin)]
+        //[Authorize(Roles = SD.Role_Admin)]
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse>> UpdateMenu(int id, MenuUpdateDTO menuUpdateDTO)
         {
             try
             {
-                if (menuUpdateDTO == null || id != menuUpdateDTO.Id)
+
+                if (ModelState.IsValid)
                 {
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    _apiResponse.IsSuccess = false;
-                    return _apiResponse;
+                    _menuService.UpdateMenu(id, menuUpdateDTO);
                 }
-
-                MenuItem menuItem = _db.Menu.Find(id);
-                if (menuItem == null)
-                {
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    _apiResponse.IsSuccess = false;
-                    return _apiResponse;
-                }
-                menuItem.Id= menuUpdateDTO.Id;
-                menuItem.Name = menuUpdateDTO.Name;
-                menuItem.Price = menuUpdateDTO.Price;
-                menuItem.Description = menuUpdateDTO.Description;
-                menuItem.Category = menuUpdateDTO.Category;
-                menuItem.Image = menuUpdateDTO.Image;
-                menuItem.SpecialTag = menuUpdateDTO.SpecialTag;
-
-
-                _db.Menu.Update(menuItem);
-                await _db.SaveChangesAsync();
-
                 _apiResponse.StatusCode = HttpStatusCode.NoContent;
                 return _apiResponse;
             }
@@ -143,11 +122,11 @@ namespace FastFoodHouse_API.Controller
 
 
         [HttpDelete("{id}")]
-        public  async Task<ActionResult<MenuDTO>> DeleteMenu(int id)
+        public  async Task<ActionResult<MenuItem>> DeleteMenu(int id)
         {
             try
             {
-               MenuDTO menuDTO= await _menuService.DeleteMenu(id);
+               MenuItem menuDTO= await _menuService.DeleteMenu(id);
                 return NoContent();
             }
             catch (Exception ex)

@@ -35,12 +35,14 @@ namespace FastFoodHouse_API.Service
 
         public void RemoveItemInCart(CartItemDTO cartItemDto)
         {
-            throw new NotImplementedException();
+            CartItem cartItemToRemove = _mapper.Map<CartItem>(cartItemDto);
+            _cartItemRepo.RemoveItemInCart(cartItemToRemove);
         }
 
-        public void UpdateItenInCart(CartItemDTO cartItemDTO)
+        public void UpdateItemInCart(CartItemDTO cartItemDTO)
         {
-            throw new NotImplementedException();
+            var cartItemToUpdate = _mapper.Map<CartItem>(cartItemDTO);
+            _cartItemRepo.updateCartItem(cartItemToUpdate);
         }
     }
 }

@@ -6,6 +6,13 @@ namespace FastFoodHouse_API.Models
 {
     public class OrderHeader
     {
+        public OrderHeader()
+        {
+            OrderDetails = new List<OrderDetail>();
+        }
+
+
+
         [Key]
         public int OrderheaderId {  get; set; }
         [Required]
@@ -28,7 +35,7 @@ namespace FastFoodHouse_API.Models
         public string StripePaymentIntentID { get; set; }
         public string Status { get; set; }
         public int TotalItems { get; set; }
-        public IEnumerable<OrderDetail>? OrderDetails { get; set; }
+        public List<OrderDetail> OrderDetails { get; set; } 
 
 
         // [Key]

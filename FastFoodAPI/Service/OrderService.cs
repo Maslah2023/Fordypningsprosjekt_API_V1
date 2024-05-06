@@ -32,8 +32,9 @@ namespace FastFoodHouse_API.Service
                 //    OrderDate = DateTime.Now,
                 //};
                 OrderHeader? orderHeader = _mapper.Map<OrderHeader>(orderHeaderDTO);
-                IEnumerable<OrderDetail> orderDetails = _mapper.Map<IEnumerable<OrderDetail>>(orderHeaderDTO.OrderDetailsDTO);
-                var order  = await _orderRepo.CreateOrder(orderHeader, orderDetails);
+                //List<OrderDetail> orderDetails = _mapper.Map<List<OrderDetail>>(orderHeaderDTO.OrderDetails);
+             
+                var order  = await _orderRepo.CreateOrder(orderHeader, orderHeader.OrderDetails);
                 if (order != null)
                 {
                     return null;
@@ -46,6 +47,11 @@ namespace FastFoodHouse_API.Service
                 Console.WriteLine(ex.Message);
                 throw;
             }
+        }
+
+        public void DeleteOrderById(int id, int menuId)
+        {
+            _orderRepo.DeleteOrderById(id, menuId);
         }
 
         public async Task<OrderHeaderDTO> GetOrderById(int id)

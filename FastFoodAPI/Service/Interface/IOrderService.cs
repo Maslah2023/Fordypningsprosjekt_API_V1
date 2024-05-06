@@ -9,5 +9,6 @@ namespace FastFoodHouse_API.Service.Interface
         Task<IEnumerable<OrderHeaderDTO>> GetOrders(string userId);
         Task<OrderHeaderDTO> CreateOrder(OrderHeaderDTO order);
         void UpdateOrder(int id, OrderHeaderUpdateDTO orderHeaderUpdateDTO);
+        void DeleteOrderById(int id, int menuId);   
     }
 }

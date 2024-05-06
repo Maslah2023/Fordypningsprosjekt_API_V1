@@ -5,10 +5,10 @@ namespace FastFoodHouse_API.Service.Interface
 {
     public interface IMenuService
     {
-        Task<IEnumerable<MenuDTO>> GetAllMenuesAsync();
-        Task<MenuDTO> GetMenuByIdAsync(int menuId);
-        Task<MenuDTO> AddMenu(CreateMenuDTO item);
-        void UpdateMenu(int menuId);
-        Task<MenuDTO> DeleteMenu(int menuId);
+        Task<IEnumerable<MenuItem>> GetAllMenuesAsync();
+        Task<MenuItemDTO> GetMenuByIdAsync(int menuId);
+        Task<MenuItem> AddMenu(CreateMenuDTO item);
+        void UpdateMenu(int menuId, MenuUpdateDTO menuUpdateDTO);
+        Task<MenuItem> DeleteMenu(int menuId);
     }
 }

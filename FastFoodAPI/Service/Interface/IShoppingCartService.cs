@@ -7,8 +7,9 @@ namespace FastFoodHouse_API.Service.Interface
     {
         Task<ShoppingCartDTO> GetShoppingCart(string userId);
         Task<ShoppingCartDTO> GetShoppingById(string id);
-        void CreateShoppingCart(ShoppingCartCreateDTO shoppingCartCreateDTO);
+        Task<ShoppingCartDTO> CreateShoppingCart(ShoppingCartCreateDTO shoppingCartCreateDTO);
         void RemoveCart(ShoppingCartDTO shoppingCartDto);
+        void UpdateShoppingCart(ShoppingCartDTO shoppingCartDTO);
         void SaveChangesAsync();
 
     }

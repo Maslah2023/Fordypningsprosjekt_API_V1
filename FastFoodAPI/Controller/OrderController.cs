@@ -35,7 +35,7 @@ namespace FastFoodHouse_API.Controller
             try
             {
                
-                var createdOrder = _orderService.CreateOrder(orderHeaderDTO);
+                var createdOrder = await _orderService.CreateOrder(orderHeaderDTO);
 
             } catch (Exception ex)
 
@@ -46,7 +46,7 @@ namespace FastFoodHouse_API.Controller
             return BadRequest(_apiResponse);
         }
 
-        //[Authorize]
+        //[Authorize(Roles = SD.Role_Admin)]
         [HttpGet]
         public async Task<ActionResult<ApiResponse>> GetOrders(string userId)
         {
@@ -76,7 +76,7 @@ namespace FastFoodHouse_API.Controller
 
         }
 
-        [Authorize(Roles = SD.Role_Admin)]
+      //[Authorize(Roles = SD.Role_Admin)]
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ApiResponse>> GetorderById(int id)
         {
@@ -135,6 +135,14 @@ namespace FastFoodHouse_API.Controller
             return NoContent();
            
          
+        }
+
+        [HttpDelete]
+        public ActionResult DeleteOrderById(int id, int menuId)
+        {
+        
+           _orderService.DeleteOrderById(id, menuId);
+            return NoContent();
         }
 
     }

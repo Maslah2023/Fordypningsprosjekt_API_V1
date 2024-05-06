@@ -7,5 +7,6 @@ namespace FastFoodHouse_API.Repository.Interface
         Task<CartItem> GetItemInCartAsync(int menuItemId);
         void AddItemToCar(CartItem cartItem);
         void RemoveItemInCart(CartItem cartItem);
+        void updateCartItem(CartItem cartItem);
     }
 }

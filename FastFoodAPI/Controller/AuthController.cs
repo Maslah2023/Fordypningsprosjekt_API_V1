@@ -31,7 +31,7 @@ namespace FastFoodHouse_API.Controller
             if (!string.IsNullOrEmpty(erroMessage))
             {
                 _response.Message = erroMessage;
-                return Ok(_response);
+                return BadRequest(_response);
             }
             else
             {
@@ -39,7 +39,7 @@ namespace FastFoodHouse_API.Controller
                 _response.Message = erroMessage;
                 _response.IsSuccess = true;    
             }
-            return BadRequest(_response);
+            return Ok(_response);
         }
 
         [HttpPost("login")]

@@ -20,12 +20,13 @@ namespace FastFoodHouse_API.Controller
         private readonly ICustomerService _customerService;
         private readonly ILogger<CustomerService> _logger;
         protected ApiResponse _apiResponse;
+        private readonly ICartItemService _cartItemService;
 
-        public CustomerController(ICustomerService customerService, ILogger<CustomerController> logger)
+        public CustomerController(ICustomerService customerService, ILogger<CustomerController> logger, ICartItemService cartItemService)
         {
             _customerService = customerService;
             _apiResponse = new ApiResponse();
-            
+            _cartItemService = cartItemService;
         }
 
 
@@ -33,9 +34,9 @@ namespace FastFoodHouse_API.Controller
 
 
 
-        [Authorize(Roles = SD.Role_Admin)]
+        //[Authorize(Roles = SD.Role_Admin)]
         [HttpGet]
-        public async Task<ActionResult<ApiResponse>> GetAllUsers()
+        public async Task<ActionResult<ApiResponse>> GetAllUsers(string userId)
         {
             try
             {
@@ -54,23 +55,25 @@ namespace FastFoodHouse_API.Controller
                 _apiResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
                 _apiResponse.Message = "Internal Server Error";
                 return _apiResponse;
-            
+
             }
-           
+
+
+
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(string id)
         {
 
         
-            // Retrieve the currently logged-in user's ID from claims
-            var currentUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (currentUser != id)
-            {
-                return Unauthorized();
-            }
+            //// Retrieve the currently logged-in user's ID from claims
+            //var currentUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            //if (currentUser != id)
+            //{
+            //    return Unauthorized();
+            //}
             var loginUser = await _customerService.GetCustomerById(id);
             if (loginUser == null)
             {
