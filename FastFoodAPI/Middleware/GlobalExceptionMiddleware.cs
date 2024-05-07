@@ -10,7 +10,7 @@
         {
             private readonly ILogger<GlobalExceptionMiddleware> _logger;
 
-            public GlobalExceptionMiddleware(ILogger<GlobalExceptionMiddleware> logger)
+                public GlobalExceptionMiddleware(ILogger<GlobalExceptionMiddleware> logger)
             {
                 _logger = logger;
             }

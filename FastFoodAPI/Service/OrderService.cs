@@ -79,11 +79,11 @@ namespace FastFoodHouse_API.Service
             }
         }
 
-        public async Task<IEnumerable<OrderHeaderDTO>> GetOrders(string userId)
+        public async Task<IEnumerable<OrderHeaderDTO>> GetOrders()
         {
             try
             {
-                IEnumerable<OrderHeader> orders = await _orderRepo.GetOrders(userId);
+                IEnumerable<OrderHeader> orders = await _orderRepo.GetOrders();
                 IEnumerable<OrderHeaderDTO> orderHeaderDTO = _mapper.Map<IEnumerable<OrderHeaderDTO>>(orders);
                 return orderHeaderDTO;
             }

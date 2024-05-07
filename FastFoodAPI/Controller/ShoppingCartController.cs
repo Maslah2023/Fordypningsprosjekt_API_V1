@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FastFoodAPI.Utility;
 using FastFoodHouse_API.Data;
 using FastFoodHouse_API.Models;
 using FastFoodHouse_API.Models.Dtos;
@@ -11,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace FastFoodHouse_API.Controllers
@@ -32,6 +34,8 @@ namespace FastFoodHouse_API.Controllers
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Customer)]
         [HttpGet]
         public async Task<ActionResult<ShoppingCartDTO>> GetShoppingCart(string userId)
         {
@@ -40,6 +44,23 @@ namespace FastFoodHouse_API.Controllers
                 if (string.IsNullOrEmpty(userId))
                 {
                     return BadRequest("User ID cannot be null or empty.");
+                }
+
+                var userClaims = User.Claims;
+                var roleClaim = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                
+
+                if (roleClaim != null)
+                {
+                    // Get the role value
+                    var role = roleClaim.Value;
+
+                    // Check if the current user is the same as the specified id or is an admin
+                    if (currentUserId != userId && role != SD.Role_Admin)
+                    {
+                        return Unauthorized("Unauthorized");
+                    }
                 }
 
                 ShoppingCartDTO shoppingCart = await _shoppingCartService.GetShoppingCart(userId);
@@ -57,14 +78,34 @@ namespace FastFoodHouse_API.Controllers
             }
         }
 
+
+
+        [Authorize(Roles =SD.Role_Customer)]
         [HttpPost]
         public async Task<ActionResult<ShoppingCartDTO>> AddOrUpdateCart(string userId, int menuItemId, int updateQuantityBy)
         {
             try
             {
-                if (string.IsNullOrEmpty(userId) || updateQuantityBy == 0)
+                // UserID and MenuItemID are required. Additionally, provide 'updateQuantityBy
+               // "to add an item. To remove an item, 'updateQuantityBy' should not be included"
+                if (string.IsNullOrEmpty(userId) || menuItemId == 0)
                 {
-                    return BadRequest("User ID and update quantity must be provided and greater than 0.");
+                    return BadRequest();
+
+                }
+
+                var userClaims = User.Claims;
+                var roleClaim = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+                if (roleClaim != null)
+                {
+                    // Get the role value
+                    var role = roleClaim.Value;
+
+                    // Check if the current user is the same as the specified id or is an admin
+                    if (role == SD.Role_Admin)
+                    {
+                        return Unauthorized("Not Allowed");
+                    }
                 }
 
                 ShoppingCartDTO shoppingCart = await _shoppingCartService.GetShoppingCart(userId);
@@ -72,6 +113,7 @@ namespace FastFoodHouse_API.Controllers
                 {
                     ShoppingCartCreateDTO newCart = new ShoppingCartCreateDTO() { UserId = userId };
                     shoppingCart = await _shoppingCartService.CreateShoppingCart(newCart);
+                    return Ok("Item Added To Shopping Cart");
                 }
 
                 if (shoppingCart != null)
@@ -94,12 +136,13 @@ namespace FastFoodHouse_API.Controllers
                             ShoppingCartId = shoppingCart.Id
                         };
                          _cartItemService.AddItemToCart(newItem);
+                          return Ok("Item Added To Shopping Cart");
                     }
                     else
                     {
                         int newQuantity = itemInCart.Quantity + updateQuantityBy;
 
-                        if (newQuantity <= 0)
+                        if (updateQuantityBy == 0 && itemInCart != null)
                         {
                              _cartItemService.RemoveItemInCart(itemInCart);
                             if (shoppingCart.CartItems.Count() == 1)
@@ -113,8 +156,8 @@ namespace FastFoodHouse_API.Controllers
                            _cartItemService.UpdateItemInCart(itemInCart);
                         }
                     }
-
-                    return Ok(shoppingCart);
+                    return Ok("Item Deleted From Shopping Cart");
+                  
                 }
                 else
                 {

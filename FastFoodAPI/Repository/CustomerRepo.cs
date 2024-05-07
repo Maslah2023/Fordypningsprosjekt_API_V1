@@ -76,7 +76,7 @@ namespace FastFoodHouse_API.Repository
                 if (customer != null)
                 {
                     customer.Name = user.Name;
-                    customer.Email = user.UserName;
+                    customer.UserName = user.UserName;
                     customer.Email = user.Email;
                     customer.NormalizedEmail = user.Email;
                     customer.Address = user.Address;

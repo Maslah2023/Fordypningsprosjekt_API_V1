@@ -58,7 +58,7 @@ namespace FastFoodHouse_API.Controller
 
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Customer)]
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById(string id)
+        public async Task<ActionResult<CustomerDTO>> GetUserById(string id)
         {
 
             try
@@ -75,11 +75,9 @@ namespace FastFoodHouse_API.Controller
                     // Check if the current user is the same as the specified id or is an admin
                     if (currentUserId != id && role != SD.Role_Admin)
                     {
-                        return Unauthorized();
+                        return Unauthorized("Access Denied");
                     }
                 }
-                
-
                 var customer = await _customerService.GetCustomerById(id);
                 if (customer == null)
                 {

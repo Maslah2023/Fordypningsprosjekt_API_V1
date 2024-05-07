@@ -84,7 +84,24 @@ namespace FastFoodHouse_API.Controller
         {
             try
             {
+                var menuDTO = await _menuService.AddMenu(createMenuDTO);
+                return Ok("Order Created successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while creating the menu.");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
 
+
+
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Customer)]
+        [HttpPut("{id}")]
+        public ActionResult<MenuItemDTO> UpdateMenu(int id, MenuUpdateDTO menuUpdateDTO)
+        {
+            try
+            {
                 var userClaims = User.Claims;
                 var roleClaim = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
                 var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -99,27 +116,10 @@ namespace FastFoodHouse_API.Controller
                         return Unauthorized("Unauthorized");
                     }
                 }
-                var menuDTO = await _menuService.AddMenu(createMenuDTO);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An error occurred while creating the menu.");
-                return StatusCode(500, "Internal Server Error");
-            }
-        }
-
-
-        //[Authorize(Roles = SD.Role_Admin)]
-        [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse>> UpdateMenu(int id, MenuUpdateDTO menuUpdateDTO)
-        {
-            try
-            {
                 if (ModelState.IsValid)
                 {
                     _menuService.UpdateMenu(id, menuUpdateDTO);
-                    return NoContent();
+                    return Ok("Menu Updated successfully.");
                 }
                 else
                 {
@@ -134,17 +134,33 @@ namespace FastFoodHouse_API.Controller
         }
 
 
+
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Customer)]
         [HttpDelete("{id}")]
         public async Task<ActionResult<MenuItem>> DeleteMenu(int id)
         {
             try
             {
+                var userClaims = User.Claims;
+                var roleClaim = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (roleClaim != null)
+                {
+                    // Get the role value
+                    var role = roleClaim.Value;
+
+                    // Check if the current user is the same as the specified id or is an admin
+                    if (role != SD.Role_Admin)
+                    {
+                        return Unauthorized("Unauthorized");
+                    }
+                }
                 var menuDTO = await _menuService.DeleteMenu(id);
                 if (menuDTO == null)
                 {
                     return NotFound();
                 }
-                return NoContent();
+                return Ok("Menu Deleted successfully.");
             }
             catch (Exception ex)
             {

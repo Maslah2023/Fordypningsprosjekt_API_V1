@@ -5,6 +5,14 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastFoodHouse_API", "FastFoodAPI\FastFoodHouse_API.csproj", "{7057B5D8-200C-4006-A5A2-A1F6BB17C401}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7EC77FD6-46D5-485D-957F-556D822B074A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntregrationTest", "IntregrationTest", "{497DE181-D6A1-4CA8-AEAE-5E99778AC5DA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTest", "UnitTest", "{1044B446-A18F-43BF-ADB0-9F19C17621A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastFoodHouse_API.UnitTests", "Tests\FastFoodHouse_API.UnitTests\FastFoodHouse_API.UnitTests.csproj", "{A4C41BA2-736E-4DA7-8EE3-6666CEFFC68A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +23,18 @@ Global
 		{7057B5D8-200C-4006-A5A2-A1F6BB17C401}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7057B5D8-200C-4006-A5A2-A1F6BB17C401}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7057B5D8-200C-4006-A5A2-A1F6BB17C401}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4C41BA2-736E-4DA7-8EE3-6666CEFFC68A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4C41BA2-736E-4DA7-8EE3-6666CEFFC68A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4C41BA2-736E-4DA7-8EE3-6666CEFFC68A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4C41BA2-736E-4DA7-8EE3-6666CEFFC68A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{497DE181-D6A1-4CA8-AEAE-5E99778AC5DA} = {7EC77FD6-46D5-485D-957F-556D822B074A}
+		{1044B446-A18F-43BF-ADB0-9F19C17621A4} = {7EC77FD6-46D5-485D-957F-556D822B074A}
+		{A4C41BA2-736E-4DA7-8EE3-6666CEFFC68A} = {1044B446-A18F-43BF-ADB0-9F19C17621A4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE184E05-6F6B-439C-BFA2-774D4931C5C3}

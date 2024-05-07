@@ -33,22 +33,10 @@ namespace FastFoodHouse_API.Repository
 
                 _db.OrderHeaders.Add(orderHeader);
                 await _db.SaveChangesAsync();
-
-                // Add order details if provided
-                if (orderDetail != null)
-                {
-                    foreach (OrderDetail detail in orderDetail)
-                    {
-                        detail.OrderHeaderId = orderHeader.OrderheaderId;
-                        _db.orderDetails.Add(detail);
-                    }
-                    await _db.SaveChangesAsync();
-                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while creating an order.");
-                // You may want to throw the exception here depending on your requirements
                 return null;
             }
 
@@ -92,7 +80,7 @@ namespace FastFoodHouse_API.Repository
             try
             {
                 OrderHeader orderHeader = await _db.OrderHeaders.Include(u => u.OrderDetails)
-                    .FirstOrDefaultAsync(u => u.OrderheaderId == id);
+                    .AsNoTracking().FirstOrDefaultAsync(u => u.OrderheaderId == id);
                 return orderHeader;
             }
             catch (Exception ex)
@@ -102,7 +90,7 @@ namespace FastFoodHouse_API.Repository
             }
         }
 
-        public async Task<IEnumerable<OrderHeader>> GetOrders(string userId)
+        public async Task<IEnumerable<OrderHeader>> GetOrders()
         {
             try
             {
@@ -133,7 +121,7 @@ namespace FastFoodHouse_API.Repository
         {
             try
             {
-                OrderHeader orderToUpdate = _db.OrderHeaders.AsNoTracking().SingleOrDefault(x => x.OrderheaderId == id);
+                OrderHeader orderToUpdate = _db.OrderHeaders.AsNoTracking().FirstOrDefault(u => u.OrderheaderId == id);
                 if (orderToUpdate != null)
                 {
                     order.OrderheaderId = id;
