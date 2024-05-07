@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FastFoodHouse_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240506093958_initial")]
+    [Migration("20240506232203_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -101,6 +101,9 @@ namespace FastFoodHouse_API.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Role")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");

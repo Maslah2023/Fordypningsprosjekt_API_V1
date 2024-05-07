@@ -11,6 +11,5 @@ namespace FastFoodHouse_API.Repository.Interface
         void RemoveCart(ShoppingCart shoppingCart);
 
         void UpdateShoppingCart(ShoppingCart shoppingCart);
-        void SaveChangesAsync();
     }
 }

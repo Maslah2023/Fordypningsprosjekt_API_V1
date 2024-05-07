@@ -10,7 +10,6 @@ namespace FastFoodHouse_API.Service.Interface
         Task<ShoppingCartDTO> CreateShoppingCart(ShoppingCartCreateDTO shoppingCartCreateDTO);
         void RemoveCart(ShoppingCartDTO shoppingCartDto);
         void UpdateShoppingCart(ShoppingCartDTO shoppingCartDTO);
-        void SaveChangesAsync();
 
     }
 }

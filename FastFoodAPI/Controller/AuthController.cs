@@ -20,7 +20,7 @@ namespace FastFoodHouse_API.Controller
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterRequestDTO model)
+        public async Task<ActionResult> Register(RegisterRequestDTO model)
         {
             try
             {

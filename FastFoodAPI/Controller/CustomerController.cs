@@ -34,7 +34,7 @@ namespace FastFoodHouse_API.Controller
 
 
 
-        //[Authorize(Roles = SD.Role_Admin)]
+        [Authorize(Roles = SD.Role_Admin)]
         [HttpGet]
         public async Task<ActionResult> GetCustomers()
         {
@@ -56,7 +56,7 @@ namespace FastFoodHouse_API.Controller
         }
 
 
-        //[Authorize]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Customer)]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(string id)
         {
@@ -64,11 +64,21 @@ namespace FastFoodHouse_API.Controller
             try
             {
                 // Retrieve the currently logged-in user's ID from claims
-                var currentUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (currentUser != id)
+                var userClaims = User.Claims;
+                var roleClaim = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (roleClaim != null)
                 {
-                    return Unauthorized();
+                    // Get the role value
+                    var role = roleClaim.Value;
+
+                    // Check if the current user is the same as the specified id or is an admin
+                    if (currentUserId != id && role != SD.Role_Admin)
+                    {
+                        return Unauthorized();
+                    }
                 }
+                
 
                 var customer = await _customerService.GetCustomerById(id);
                 if (customer == null)
@@ -86,12 +96,27 @@ namespace FastFoodHouse_API.Controller
         }
 
 
-        //[Authorize(Roles = SD.Role_Admin  + "," + SD.Role_Customer)]
+        [Authorize(Roles = SD.Role_Admin  + "," + SD.Role_Customer)]
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse>> UpdateCustomerAsync(string id, UpdateCustomerDTO updateCustomerDTO, string currentPassword, string newPassword)
         {
             try
             {
+                var userClaims = User.Claims;
+                var roleClaim = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (roleClaim != null)
+                {
+                    // Get the role value
+                    var role = roleClaim.Value;
+
+                    // Check if the current user is the same as the specified id or is an admin
+                    if (currentUserId != id && role != SD.Role_Admin)
+                    {
+                        return Unauthorized();
+                    }
+                }
+
                 var customer = await _customerService.UpdateCustomer(id, updateCustomerDTO, currentPassword, newPassword);
                 if (customer == null)
                 {
@@ -110,7 +135,7 @@ namespace FastFoodHouse_API.Controller
         }
 
 
-
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Customer)]
         [HttpDelete("{userId}")]
         public async Task<ActionResult<CustomerDTO>> DeleteCustomer(string userId)
         {
@@ -119,6 +144,20 @@ namespace FastFoodHouse_API.Controller
                 if (string.IsNullOrEmpty(userId))
                 {
                     return BadRequest();
+                }
+                var userClaims = User.Claims;
+                var roleClaim = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (roleClaim != null)
+                {
+                    // Get the role value
+                    var role = roleClaim.Value;
+
+                    // Check if the current user is the same as the specified id or is an admin
+                    if (currentUserId != userId && role != SD.Role_Admin)
+                    {
+                        return Unauthorized("Unauthorized");
+                    }
                 }
 
                 var deletedCustomer = await _customerService.DeleteCustomer(userId);

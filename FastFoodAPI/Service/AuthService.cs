@@ -36,7 +36,8 @@ namespace FastFoodHouse_API.Service
         {
             try
             {
-                var customer = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+                var customer = await _userManager.Users
+               .FirstOrDefaultAsync(u => u.Email.ToLower() == model.Email.ToLower() || u.UserName.ToLower() == model.Email.ToLower());
 
                 if (customer == null)
                 {

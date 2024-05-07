@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Security.Claims;
 
 namespace FastFoodHouse_API.Controller
 {
@@ -77,12 +78,27 @@ namespace FastFoodHouse_API.Controller
 
 
 
-
+        [Authorize(Roles = SD.Role_Admin)]
         [HttpPost]
         public async Task<ActionResult<MenuItem>> CreateMenu(CreateMenuDTO createMenuDTO)
         {
             try
             {
+
+                var userClaims = User.Claims;
+                var roleClaim = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (roleClaim != null)
+                {
+                    // Get the role value
+                    var role = roleClaim.Value;
+
+                    // Check if the current user is the same as the specified id or is an admin
+                    if (role != SD.Role_Admin)
+                    {
+                        return Unauthorized("Unauthorized");
+                    }
+                }
                 var menuDTO = await _menuService.AddMenu(createMenuDTO);
                 return Ok();
             }
