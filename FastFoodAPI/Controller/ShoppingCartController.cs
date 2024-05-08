@@ -34,6 +34,9 @@ namespace FastFoodHouse_API.Controllers
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+        public ShoppingCartController(IShoppingCartService object1, IConfiguration object2)
+        {
+        }
 
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Customer)]
         [HttpGet]

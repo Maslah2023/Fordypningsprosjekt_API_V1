@@ -8,7 +8,7 @@
             public int id {  get; set; } 
             public int MenuItemId { get; set; }
             [ForeignKey("MenuItemId")]
-            public MenuItem MenuItems { get; set; }
+            public MenuItem MenuItem { get; set; }
             public int Quantity  { get; set; }
             public int ShoppingCartId { get; set; }
         }

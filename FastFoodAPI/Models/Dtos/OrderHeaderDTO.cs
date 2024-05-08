@@ -5,6 +5,8 @@ namespace FastFoodHouse_API.Models.Dtos
 {
     public class OrderHeaderDTO
     {
+
+        public int Id { get; set; }
         [Required]
         public string PickupName { get; set; }
         [Required]

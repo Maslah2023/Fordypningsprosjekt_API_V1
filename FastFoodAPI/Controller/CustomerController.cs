@@ -34,7 +34,7 @@ namespace FastFoodHouse_API.Controller
 
         [Authorize(Roles = SD.Role_Admin)]
         [HttpGet]
-        public async Task<ActionResult> GetCustomers()
+        public async Task<ActionResult<CustomerDTO>> GetCustomers()
         {
             try
             {
@@ -120,7 +120,7 @@ namespace FastFoodHouse_API.Controller
                     return NotFound();
                 }
 
-                return NoContent();
+                return Ok("Customer updated successfully");
             }
             catch (Exception ex)
             {

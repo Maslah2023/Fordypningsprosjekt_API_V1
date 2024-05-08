@@ -33,7 +33,7 @@ public class ShoppingCartMapperTest
                     MenuItemId = 1,
                     Quantity = 1,
                     ShoppingCartId = 1,
-                    MenuItems = new MenuItem()
+                    MenuItem = new MenuItem()
                     {
                         Id = 1,
                         Name = "test",

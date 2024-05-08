@@ -2,6 +2,7 @@
 using FastFoodHouse_API.Data;
 using FastFoodHouse_API.Models;
 using FastFoodHouse_API.Models.Dtos;
+using FastFoodHouse_API.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,13 +21,13 @@ namespace FastFoodHouse_API.Controller
     [ApiController]
     public class PaymentController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IShoppingCartService _shoppingCartService;
         private readonly IConfiguration _configuration;
 
-        public PaymentController(ApplicationDbContext db, IConfiguration configuration)
+        public PaymentController( IShoppingCartService shoppingCartService, IConfiguration configuration)
         {
             _configuration = configuration;
-            _db = db;
+            _shoppingCartService = shoppingCartService;
         }
 
 
@@ -34,7 +35,7 @@ namespace FastFoodHouse_API.Controller
 
         [Authorize(SD.Role_Customer)]
         [HttpPost]
-        public async Task<ActionResult> MakePayment(string userId)
+        public async Task<ActionResult<ShoppingCartDTO>> MakePayment(string userId)
         {
             var userClaims = User.Claims;
             var roleClaim = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
@@ -51,17 +52,14 @@ namespace FastFoodHouse_API.Controller
                     return Unauthorized("Unauthorized");
                 }
             }
-            ShoppingCart shoppingCart = await _db.ShoppingCarts
-                .Include(u => u.CartItems)
-                .ThenInclude(u => u.MenuItems)
-                .FirstOrDefaultAsync(u => u.UserId == userId);
+            ShoppingCartDTO shoppingCart = await _shoppingCartService.GetShoppingCart(userId);
 
             if (shoppingCart == null || shoppingCart.CartItems == null || shoppingCart.CartItems.Count() == 0)
             {
                 return BadRequest("Invalid shopping cart or no items in the cart.");
             }
 
-            double cartTotal = shoppingCart.CartItems.Sum(u => u.Quantity * u.MenuItems.Price);
+            double cartTotal = shoppingCart.CartItems.Sum(u => u.Quantity * u.MenuItem.Price);
 
             StripeConfiguration.ApiKey = _configuration["StripeSettings:SecretKey"];
             PaymentIntentCreateOptions options = new PaymentIntentCreateOptions()
@@ -77,8 +75,7 @@ namespace FastFoodHouse_API.Controller
             shoppingCart.StripePaymentIntentId = response.Id;
             shoppingCart.ClientSecret = response.ClientSecret;
 
-            _db.Entry(shoppingCart).State = EntityState.Modified;
-            await _db.SaveChangesAsync();
+            
 
             return Ok(shoppingCart);
         }

@@ -171,10 +171,10 @@ namespace FastFoodHouse_API.Controllers
 
                 if (roleClaim != null)
                 {
-                    // Get the role value
+                  
                     var role = roleClaim.Value;
 
-                    // Check if the current user is the same as the specified id or is an admin
+           
                     if (currentUserId != orderHeaderDTO.ApplicationUserId && role != SD.Role_Admin)
                     {
                         return Unauthorized("Unauthorized");
@@ -186,7 +186,6 @@ namespace FastFoodHouse_API.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception if necessary
                 return BadRequest("Internal Server Error");
             }
         }

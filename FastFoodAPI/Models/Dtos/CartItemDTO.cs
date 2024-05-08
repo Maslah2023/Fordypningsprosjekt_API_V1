@@ -6,7 +6,7 @@ namespace FastFoodHouse_API.Models.Dtos
     {
         public int id { get; set; }
         public int MenuItemId { get; set; }
-        public MenuItem MenuItem { get; set; }
+        public MenuItemDTO MenuItem { get; set; }
         public int Quantity { get; set; }
         public int ShoppingCartId { get; set; }
     }

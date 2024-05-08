@@ -26,7 +26,7 @@ namespace FastFoodHouse_API.UniTests.MapperTest
                 MenuItemId = 1,
                 Quantity = 2,
                 ShoppingCartId = 1,
-                MenuItems = new MenuItem
+                MenuItem = new MenuItem
                 {
                     Id = 1,
                     Name = "Test Item",
@@ -46,13 +46,13 @@ namespace FastFoodHouse_API.UniTests.MapperTest
             Assert.Equal(cartItem.MenuItemId, cartItemDto.MenuItemId);
             Assert.Equal(cartItem.Quantity, cartItemDto.Quantity);
             Assert.Equal(cartItem.ShoppingCartId, cartItemDto.ShoppingCartId);
-            Assert.Equal(cartItem.MenuItems.Id, cartItemDto.MenuItem.Id);
-            Assert.Equal(cartItem.MenuItems.Name, cartItemDto.MenuItem.Name);
-            Assert.Equal(cartItem.MenuItems.Category, cartItemDto.MenuItem.Category);
-            Assert.Equal(cartItem.MenuItems.Description, cartItemDto.MenuItem.Description);
-            Assert.Equal(cartItem.MenuItems.SpecialTag, cartItemDto.MenuItem.SpecialTag);
-            Assert.Equal(cartItem.MenuItems.Image, cartItemDto.MenuItem.Image);
-            Assert.Equal(cartItem.MenuItems.Price, cartItemDto.MenuItem.Price);
+            Assert.Equal(cartItem.MenuItem.Id, cartItemDto.MenuItem.Id);
+            Assert.Equal(cartItem.MenuItem.Name, cartItemDto.MenuItem.Name);
+            Assert.Equal(cartItem.MenuItem.Category, cartItemDto.MenuItem.Category);
+            Assert.Equal(cartItem.MenuItem.Description, cartItemDto.MenuItem.Description);
+            Assert.Equal(cartItem.MenuItem.SpecialTag, cartItemDto.MenuItem.SpecialTag);
+            Assert.Equal(cartItem.MenuItem.Image, cartItemDto.MenuItem.Image);
+            Assert.Equal(cartItem.MenuItem.Price, cartItemDto.MenuItem.Price);
         }
     }
 }
