@@ -12,7 +12,7 @@ using System.Security.Claims;
 
 namespace FastFoodHouse_API.Controller
 {
-    [Route("api/customer")]
+    [Route("api/v1/customer")]
     [ApiController]
 
     public class CustomerController : ControllerBase

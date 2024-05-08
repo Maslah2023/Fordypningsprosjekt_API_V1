@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace FastFoodHouse_API.Controllers
 {
-    [Route("api/shoppingcart")]
+    [Route("api/v1/shoppingcart")]
     [ApiController]
     public class ShoppingCartController : ControllerBase
     {
@@ -34,9 +34,7 @@ namespace FastFoodHouse_API.Controllers
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public ShoppingCartController(IShoppingCartService object1, IConfiguration object2)
-        {
-        }
+      
 
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Customer)]
         [HttpGet]

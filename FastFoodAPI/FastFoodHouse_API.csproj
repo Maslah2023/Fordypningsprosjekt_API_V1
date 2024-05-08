@@ -29,7 +29,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<InternalsVisibleTo Include="FastFoodHouse_API.UnitTests"/>
+		<InternalsVisibleTo Include="FastFoodHouse_API.UnitTests "/>
+		<InternalsVisibleTo Include="FastFoodHouse_API.IntegrationTests "/>
 	</ItemGroup>
 
 </Project>

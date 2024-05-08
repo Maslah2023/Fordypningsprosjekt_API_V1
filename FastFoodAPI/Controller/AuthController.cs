@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FastFoodHouse_API.Controller
 {
-    [Route("api/auth")]
+    [Route("api/v1/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {

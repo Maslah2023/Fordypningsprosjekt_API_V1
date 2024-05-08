@@ -47,7 +47,7 @@ namespace FastFoodHouse_API.UnitTests.ControllerTests
             };
             _controller.ControllerContext = controllerContext;
 
-            // Create a ShoppingCart instance with necessary data
+            
             var shoppingCartDTO = new ShoppingCartDTO
             {
                 UserId = userId,
@@ -56,10 +56,10 @@ namespace FastFoodHouse_API.UnitTests.ControllerTests
 
             _shoppingCartMock.Setup(x => x.GetShoppingCart(userId)).ReturnsAsync(shoppingCartDTO);
 
-            // Mock the configuration settings for Stripe
+     
             _configurationMock.Setup(x => x["StripeSettings:SecretKey"]).Returns("sk_test_51P2wozICpKBIbkN8g4Ajn0X28pk5zRuhl5f86UBsYu1elNLIhxhon5dAvCs56MuZ6mIAj749cdTUMW4a3o8ygsVq00Z82MJq0Z");
 
-            // Mock the Stripe API call
+          
             var paymentIntentServiceMock = new Mock<Stripe.PaymentIntentService>();
             var paymentIntentMock = new Stripe.PaymentIntent { Id = "test_payment_intent_id", ClientSecret = "test_client_secret" };
             paymentIntentServiceMock.Setup(x => x.Create(It.IsAny<Stripe.PaymentIntentCreateOptions>(), null)).Returns(paymentIntentMock);
@@ -69,11 +69,12 @@ namespace FastFoodHouse_API.UnitTests.ControllerTests
             var result = await _controller.MakePayment(userId);
 
             // Assert
-            var actionResult = Assert.IsType<OkObjectResult>(result);
-            var shoppingCartResult = Assert.IsType<ShoppingCart>(actionResult.Value);
+            var actionResult = Assert.IsType < ActionResult<ShoppingCartDTO>>(result);
+            var objectResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+            var shoppingCartResult = Assert.IsType<ShoppingCartDTO>(objectResult.Value);
             Assert.Equal(userId, shoppingCartResult.UserId);
         }
 
-        // Additional test methods can be added here
+        
     }
 }

@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace FastFoodHouse_API.Controller
 {
-    [Route("api/payment")]
+    [Route("api/v1/payment")]
     [ApiController]
     public class PaymentController : ControllerBase
     {
