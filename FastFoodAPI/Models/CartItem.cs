@@ -1,15 +1,15 @@
-﻿using Microsoft.Identity.Client;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿    using Microsoft.Identity.Client;
+    using System.ComponentModel.DataAnnotations.Schema;
 
-namespace FastFoodHouse_API.Models
-{
-    public class CartItem
+    namespace FastFoodHouse_API.Models
     {
-        public int id {  get; set; } 
-        public int MenuItemId { get; set; }
-        [ForeignKey("MenuItemId")]
-        public MenuItem MenuItem { get; set; }
-        public int Quantity  { get; set; }
-        public int ShoppingCartId { get; set; }
+        public class CartItem
+        {
+            public int id {  get; set; } 
+            public int MenuItemId { get; set; }
+            [ForeignKey("MenuItemId")]
+            public MenuItem MenuItems { get; set; }
+            public int Quantity  { get; set; }
+            public int ShoppingCartId { get; set; }
+        }
     }
-}

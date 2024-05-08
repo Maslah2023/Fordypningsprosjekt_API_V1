@@ -19,13 +19,11 @@ namespace FastFoodHouse_API.Controller
     {
         private readonly ICustomerService _customerService;
         private readonly ILogger<CustomerService> _logger;
-        protected ApiResponse _apiResponse;
         private readonly ICartItemService _cartItemService;
 
         public CustomerController(ICustomerService customerService, ILogger<CustomerController> logger, ICartItemService cartItemService)
         {
             _customerService = customerService;
-            _apiResponse = new ApiResponse();
             _cartItemService = cartItemService;
         }
 

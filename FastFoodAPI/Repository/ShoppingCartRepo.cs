@@ -49,7 +49,7 @@ namespace FastFoodHouse_API.Repository
             {
                 return await _db.ShoppingCarts
                     .Include(u => u.CartItems)
-                    .ThenInclude(u => u.MenuItem)
+                    .ThenInclude(u => u.MenuItems)
                     .AsNoTracking()
                     .FirstOrDefaultAsync(u => u.UserId == userId);
             }
@@ -71,7 +71,7 @@ namespace FastFoodHouse_API.Repository
             {
                 return await _db.ShoppingCarts
                     .Include(u => u.CartItems)
-                    .ThenInclude(u => u.MenuItem)
+                    .ThenInclude(u => u.MenuItems)
                     .AsNoTracking()
                     .FirstOrDefaultAsync(u => u.UserId == userId);
             }

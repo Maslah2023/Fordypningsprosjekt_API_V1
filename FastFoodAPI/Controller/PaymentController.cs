@@ -53,7 +53,7 @@ namespace FastFoodHouse_API.Controller
             }
             ShoppingCart shoppingCart = await _db.ShoppingCarts
                 .Include(u => u.CartItems)
-                .ThenInclude(u => u.MenuItem)
+                .ThenInclude(u => u.MenuItems)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (shoppingCart == null || shoppingCart.CartItems == null || shoppingCart.CartItems.Count() == 0)
@@ -61,7 +61,7 @@ namespace FastFoodHouse_API.Controller
                 return BadRequest("Invalid shopping cart or no items in the cart.");
             }
 
-            double cartTotal = shoppingCart.CartItems.Sum(u => u.Quantity * u.MenuItem.Price);
+            double cartTotal = shoppingCart.CartItems.Sum(u => u.Quantity * u.MenuItems.Price);
 
             StripeConfiguration.ApiKey = _configuration["StripeSettings:SecretKey"];
             PaymentIntentCreateOptions options = new PaymentIntentCreateOptions()

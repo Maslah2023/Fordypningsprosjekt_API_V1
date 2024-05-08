@@ -8,6 +8,7 @@ namespace FastFoodHouse_API.Models.Dtos
         [Required]
         public int OrderHeaderId { get; set; }
         public int MenuItemId { get; set; }
+        public MenuItem MenuItem { get; set; } = new MenuItem();
         [Required]
         public int Quantity { get; set; }
         [Required]
